@@ -18,7 +18,7 @@ typedef unsigned int word;
 
 
 
-void setShiftReg();
+void setShiftReg(void);
 byte getSpeed(void);
 
 #ifdef	__cplusplus

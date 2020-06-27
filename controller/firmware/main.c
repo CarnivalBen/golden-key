@@ -39,7 +39,7 @@ int main(void) {
     TRISAbits.TRISA2 = 1; // SPEED POTENTIOMETER IN
     //TRISAbits.TRISA3 = 1; // OVERLOAD IN
     TRISAbits.TRISA4 = 0; // DATA OUT
-    TRISAbits.TRISA5 = 1; // DATA CLK OUT
+    TRISAbits.TRISA5 = 0; // DATA CLK OUT
     ODCONAbits.ODA1 = 0;
     SLRCONAbits.SLRA1 = 0;
     WPUA = 0;
@@ -81,16 +81,19 @@ void setShiftReg() {
         } else {
             RA4 = 0;
         }
-        
+        //_delaywdt(2);  
         RA5 = 1;
-        _delaywdt(20);        
+        //_delaywdt(4);        
         RA5 = 0;
+        //_delaywdt(2);  
         
         mask = mask >> 1;
-    } while (mask > 1);
+    } while (mask > 0);
     
     RA1 = 1;
-    _delaywdt(20);
+    //_delaywdt(4);
     RA1 = 0;
+    RA4 = 0;
+    RA5 = 0;
     
 }
