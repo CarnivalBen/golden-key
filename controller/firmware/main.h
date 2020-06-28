@@ -20,7 +20,7 @@ typedef unsigned int word;
 
 void setShiftReg(void);
 void updateSpeed(void);
-void updateStatus(void);
+
 
 #ifdef	__cplusplus
 }
