@@ -37,82 +37,82 @@ volatile union {
 
 //byte trackSpeed;
 byte trainDirection;
-byte pwmCount;
+word pwmCount;
 //byte tmrAdjust;
 
-const byte speedPulse[] = { 
-    0x0,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
+const word speedPulse[] = { 
+    0,
+    70,
+    85,
+    90,
+    100,
+    110,
+    115,
+    119,
+    122,
+    123,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
+    124,
 };
 
 
-const byte speedGap[] = { 
-    0x0,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,
-    0x20,    
+const word speedGap[] = { 
+    0,
+    2000,
+    1700,
+    1350,
+    1000,
+    800,
+    700,
+    620,
+    580,
+    560,
+    530,
+    500,
+    470,
+    430,
+    390,
+    320,
+    250,
+    200,
+    150,
+    100,
+    50,
+    1,
+    65000,
+    65000,
+    65000,
+    65000,
+    65000,
+    65000,
+    65000,
+    65000,
+    65000,
+    65000,    
 };
 
-byte pulse = 0x20;
-byte gap = 0xFF;
+word pulse = 0x20;
+word gap = 0xFF;
 byte phase = 0;
 
 
@@ -142,7 +142,7 @@ int main(void) {
     ADCON2 = 0b00000000;  
     
     // TIMER0 SETUP    
-    OPTION_REG = 0b11010010;
+    OPTION_REG = 0b11011000;
     TMR0 = 0;   
     pwmCount = 0;
     //tmrAdjust = 0;
@@ -208,7 +208,7 @@ void updateSpeed() {
     ADCON0bits.GO_nDONE = 1;
     while (ADCON0bits.GO_nDONE);
     
-    byte speed = ADRES >> (7 + 3);        
+    byte speed = (ADRES >> (7 + 3)) & 0b00011111;        
     trainDirection = (ADRESH & 0x80) >> 7;    
     if (!trainDirection) speed = 31 - speed;         
     
@@ -234,12 +234,12 @@ void updateSpeed() {
     output.F1 = 0;
     output.F2 = 0;
     output.F3 = 0;
-    if (gap == 12) output.R3 = 1;
-    if (gap == 13) output.R2 = 1;
-    if (gap == 14) output.R1 = 1;
-    if (gap == 15) output.F1 = 1;
-    if (gap == 16) output.F2 = 1;
-    if (gap == 17) output.F3 = 1;
+    if (speed == 0) output.R3 = 1;
+    if (speed == 1) output.R2 = 1;
+    if (speed == 2) output.R1 = 1;
+    if (speed == 3) output.F1 = 1;
+    if (speed == 4) output.F2 = 1;
+    if (speed == 5) output.F3 = 1;
     
 //    if (trainDirection) {        
 //        output.R3 = 0;
