@@ -208,9 +208,9 @@ F 3 "https://www.centralsemi.com/get_document.php?cmp=1&mergetype=pd&mergepath=p
 	1    2100 4700
 	1    0    0    -1  
 $EndComp
-Text GLabel 6350 4000 2    50   Input ~ 0
+Text GLabel 6350 4750 2    50   Input ~ 0
 FWD
-Text GLabel 6350 4100 2    50   Input ~ 0
+Text GLabel 6350 4650 2    50   Input ~ 0
 REV
 $Comp
 L Transistor_BJT:TIP42 Q3
@@ -589,23 +589,23 @@ Wire Wire Line
 $Comp
 L Device:R R14
 U 1 1 5EF1835E
-P 6100 4100
-F 0 "R14" V 5900 4100 50  0000 C CNN
-F 1 "560R" V 6000 4100 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4100 50  0001 C CNN
-F 3 "~" H 6100 4100 50  0001 C CNN
-	1    6100 4100
+P 6100 4750
+F 0 "R14" V 5900 4750 50  0000 C CNN
+F 1 "560R" V 6000 4750 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4750 50  0001 C CNN
+F 3 "~" H 6100 4750 50  0001 C CNN
+	1    6100 4750
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:R R13
 U 1 1 5EF1860D
-P 6100 4000
-F 0 "R13" V 6307 4000 50  0000 C CNN
-F 1 "560R" V 6216 4000 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4000 50  0001 C CNN
-F 3 "~" H 6100 4000 50  0001 C CNN
-	1    6100 4000
+P 6100 4650
+F 0 "R13" V 6307 4650 50  0000 C CNN
+F 1 "560R" V 6216 4650 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4650 50  0001 C CNN
+F 3 "~" H 6100 4650 50  0001 C CNN
+	1    6100 4650
 	0    -1   -1   0   
 $EndComp
 Text GLabel 7100 1350 2    50   Input ~ 0
@@ -630,21 +630,9 @@ Wire Wire Line
 Wire Wire Line
 	5250 5450 5250 5500
 Wire Wire Line
-	6350 4000 6250 4000
+	6350 4650 6250 4650
 Wire Wire Line
-	6250 4100 6350 4100
-Wire Wire Line
-	5950 4000 5750 4000
-Wire Wire Line
-	5750 4000 5750 4350
-Wire Wire Line
-	5750 4350 5650 4350
-Wire Wire Line
-	5950 4100 5800 4100
-Wire Wire Line
-	5800 4100 5800 4450
-Wire Wire Line
-	5800 4450 5650 4450
+	6250 4750 6350 4750
 Text GLabel 4700 4350 0    50   Input ~ 0
 DATA
 Text GLabel 4700 4550 0    50   Input ~ 0
@@ -742,18 +730,16 @@ $EndComp
 $Comp
 L Device:R R15
 U 1 1 5ECDE1CF
-P 6100 4550
-F 0 "R15" V 6050 4350 50  0000 C CNN
-F 1 "290R" V 6050 4750 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4550 50  0001 C CNN
-F 3 "~" H 6100 4550 50  0001 C CNN
-	1    6100 4550
+P 6100 4350
+F 0 "R15" V 6050 4150 50  0000 C CNN
+F 1 "290R" V 6050 4550 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4350 50  0001 C CNN
+F 3 "~" H 6100 4350 50  0001 C CNN
+	1    6100 4350
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	5650 4550 5950 4550
-Wire Wire Line
-	6250 4550 6750 4550
+	6250 4350 6750 4350
 $Comp
 L Device:LED D3
 U 1 1 5ECF4D93
@@ -867,23 +853,23 @@ $EndComp
 $Comp
 L Device:R R16
 U 1 1 5ED4926F
-P 6100 4650
-F 0 "R16" V 6050 4450 50  0000 C CNN
-F 1 "290R" V 6050 4850 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4650 50  0001 C CNN
-F 3 "~" H 6100 4650 50  0001 C CNN
-	1    6100 4650
+P 6100 4450
+F 0 "R16" V 6050 4250 50  0000 C CNN
+F 1 "290R" V 6050 4650 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4450 50  0001 C CNN
+F 3 "~" H 6100 4450 50  0001 C CNN
+	1    6100 4450
 	0    1    1    0   
 $EndComp
 $Comp
 L Device:R R17
 U 1 1 5ED49375
-P 6100 4750
-F 0 "R17" V 6050 4550 50  0000 C CNN
-F 1 "290R" V 6050 4950 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4750 50  0001 C CNN
-F 3 "~" H 6100 4750 50  0001 C CNN
-	1    6100 4750
+P 6100 4550
+F 0 "R17" V 6050 4350 50  0000 C CNN
+F 1 "290R" V 6050 4750 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal" V 6030 4550 50  0001 C CNN
+F 3 "~" H 6100 4550 50  0001 C CNN
+	1    6100 4550
 	0    1    1    0   
 $EndComp
 $Comp
@@ -920,19 +906,15 @@ F 3 "~" H 6100 5050 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	5650 4650 5950 4650
-Wire Wire Line
-	5650 4750 5950 4750
-Wire Wire Line
 	5650 4850 5950 4850
 Wire Wire Line
 	5650 4950 5950 4950
 Wire Wire Line
 	5650 5050 5950 5050
 Wire Wire Line
-	6250 4650 7450 4650
+	6250 4450 7450 4450
 Wire Wire Line
-	6250 4750 8150 4750
+	6250 4550 8150 4550
 Wire Wire Line
 	6250 4850 8850 4850
 Wire Wire Line
@@ -1265,9 +1247,114 @@ Wire Wire Line
 Wire Wire Line
 	8850 4850 8850 5150
 Wire Wire Line
-	8150 4750 8150 5150
+	8150 4550 8150 5150
 Wire Wire Line
-	7450 4650 7450 5150
+	7450 4450 7450 5150
 Wire Wire Line
-	6750 4550 6750 5150
+	6750 4350 6750 5150
+$Comp
+L Device:D D?
+U 1 1 5EF8C3FB
+P 9250 3350
+F 0 "D?" V 9204 3430 50  0000 L CNN
+F 1 "1N4001" V 9250 2950 50  0000 L CNN
+F 2 "" H 9250 3350 50  0001 C CNN
+F 3 "~" H 9250 3350 50  0001 C CNN
+	1    9250 3350
+	0    1    1    0   
+$EndComp
+Text GLabel 9000 3000 0    50   Input ~ 0
+12vP
+Text GLabel 9050 3600 0    50   Input ~ 0
+TRACK+
+Text GLabel 9750 3600 2    50   Input ~ 0
+TRACK-
+$Comp
+L Device:D D?
+U 1 1 5EF8DBEF
+P 9250 3850
+F 0 "D?" V 9204 3930 50  0000 L CNN
+F 1 "1N4001" V 9300 3450 50  0000 L CNN
+F 2 "" H 9250 3850 50  0001 C CNN
+F 3 "~" H 9250 3850 50  0001 C CNN
+	1    9250 3850
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:D D?
+U 1 1 5EF8DD5D
+P 9550 3350
+F 0 "D?" V 9504 3430 50  0000 L CNN
+F 1 "1N4001" V 9595 3430 50  0000 L CNN
+F 2 "" H 9550 3350 50  0001 C CNN
+F 3 "~" H 9550 3350 50  0001 C CNN
+	1    9550 3350
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:D D?
+U 1 1 5EF8DE71
+P 9550 3850
+F 0 "D?" V 9504 3930 50  0000 L CNN
+F 1 "1N4001" V 9595 3930 50  0000 L CNN
+F 2 "" H 9550 3850 50  0001 C CNN
+F 3 "~" H 9550 3850 50  0001 C CNN
+	1    9550 3850
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	9000 3000 9250 3000
+Wire Wire Line
+	9250 3000 9250 3200
+Wire Wire Line
+	9250 3000 9550 3000
+Wire Wire Line
+	9550 3000 9550 3200
+Wire Wire Line
+	9250 3500 9250 3600
+Wire Wire Line
+	9550 3500 9550 3600
+Wire Wire Line
+	9250 4000 9250 4250
+Wire Wire Line
+	9550 4000 9550 4250
+Wire Wire Line
+	9550 4250 9400 4250
+Wire Wire Line
+	9050 3600 9250 3600
+Connection ~ 9250 3600
+Wire Wire Line
+	9250 3600 9250 3700
+Wire Wire Line
+	9750 3600 9550 3600
+Connection ~ 9550 3600
+Wire Wire Line
+	9550 3600 9550 3700
+$Comp
+L power:GND #PWR?
+U 1 1 5EFD4272
+P 9400 4350
+F 0 "#PWR?" H 9400 4100 50  0001 C CNN
+F 1 "GND" H 9405 4177 50  0000 C CNN
+F 2 "" H 9400 4350 50  0001 C CNN
+F 3 "" H 9400 4350 50  0001 C CNN
+	1    9400 4350
+	1    0    0    -1  
+$EndComp
+Connection ~ 9250 3000
+Wire Wire Line
+	9400 4350 9400 4250
+Connection ~ 9400 4250
+Wire Wire Line
+	9400 4250 9250 4250
+Wire Wire Line
+	5650 4350 5950 4350
+Wire Wire Line
+	5650 4450 5950 4450
+Wire Wire Line
+	5650 4550 5950 4550
+Wire Wire Line
+	5650 4650 5950 4650
+Wire Wire Line
+	5650 4750 5950 4750
 $EndSCHEMATC
