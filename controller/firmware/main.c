@@ -44,10 +44,7 @@ const word speedGap[] =   { 0x0,0x0,0x0,0x0,0x7CF,0x789,0x746,0x704,0x6C5,0x688,
 word pulse = 0;
 word gap = 0;
 byte phase = 0;
-volatile byte overload = 0;
 
-#define OVERLOAD_PULSE 10
-#define OVERLOAD_GAP 30000
 
 
 int main(void) {
@@ -82,34 +79,21 @@ int main(void) {
     pwmCount = 0;
     
     // INTERRUPT SETUP
-    IOCAP = 0b00001000;
-    IOCAN = 0b00000000;
-    IOCAF = 0b00001000;
-    IOCIE = 1;
-    TMR0IE = 0;
+//    IOCAP = 0b00000000;
+//    IOCAN = 0b00001000;
+//    IOCAF = 0b00001000;
+//    IOCIE = 1;
+//    TMR0IE = 0;
     GIE = 1;
     
-    overload = 0;
-    
-    while (1) {
-                
-        if (!overload) {
-            RA0 = 1;
-            updateSpeed(); 
-            
-        } else if (RA0 == 1) {
-            GIE = 0;
-            output.shiftData = 0;            
-            RA0 = 0;
-            pulse = OVERLOAD_PULSE;
-            gap = OVERLOAD_GAP;
-            pwmCount = gap;
-            phase = 1;
-            GIE = 1;
-            
-        }
+   
+    while (1) {                        
         
+        updateSpeed(); 
+                       
         setShiftReg();      
+        
+        RA0 = RA3;
         
         CLRWDT();
         
@@ -141,30 +125,20 @@ void __interrupt() isr() {
                 output.FWD = 0;
                 output.REV = 1;
             }       
-             
-        } else if (phase == 0 && overload && pwmCount == 1) {
-            overload = 0;
-            RA0 = 1;
-            gap = 3000;
+                     
         }     
     }     
     
-    if (IOCIE && IOCIF) {
-        IOCIF = 0;
-        
-        if (IOCAFbits.IOCAF3) {
-            //asm("BANKSEL IOCAF");
-            //asm("movlw 0xFF");
-            //asm("xorwf IOCAF, w");
-            //asm("andwf IOCAF, f");
-            //IOCAF = IOCAF & (IOCAF ^ 0xFF);
-            IOCAFbits.IOCAF3 = 0;  
-            
-            if (RA3) overload = 1;
-            
-        }
-        
-    }
+//    if (IOCIE && IOCIF) {
+//        IOCIF = 0;
+//        
+//        if (IOCAFbits.IOCAF3) {
+//            IOCAFbits.IOCAF3 = 0;              
+//            //if (RA3 == 0) RA0 = 0;
+//            
+//        }
+//        
+//    }
        
     return;
 }
