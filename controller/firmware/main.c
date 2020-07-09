@@ -14,7 +14,7 @@
 #pragma config STVREN = ON      // Stack Overflow/Underflow Reset Enable (Stack Overflow or Underflow will cause a Reset)
 #pragma config BORV = LO        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (Vbor), low trip point selected.)
 #pragma config LPBOREN = OFF    // Low Power Brown-out Reset enable bit (LPBOR is disabled)
-#pragma config LVP = ON         // Low-Voltage Programming Enable (Low-voltage programming enabled)
+#pragma config LVP = OFF         // Low-Voltage Programming Enable (Low-voltage programming enabled)
 
 #include <xc.h>
 #include <stdio.h>
@@ -93,9 +93,9 @@ int main(void) {
                        
         setShiftReg();      
         
-        if (getCurrent() > 100) {
+        if (getCurrent() > 10) {
             
-            TMR0IE = 0;
+            GIE = 0;
             output.FWD = 0;
             output.REV = 0;
             TMR0IF = 0;
@@ -103,9 +103,12 @@ int main(void) {
             phase = 1;
             
             for (byte count = 1; count <= 10; count++) {
-                LATA0 = count % 2;
+                LATA0 = 0;
+                _delaywdt(1000000);
+                LATA0 = 1;
                 _delaywdt(1000000);
             }
+            GIE = 1;
             
         }
         
