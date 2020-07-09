@@ -67,8 +67,8 @@ int main(void) {
     ODA1 = 0;
     SLRA1 = 0;
     WPUA = 0;
-    RA0 = 1;
-    ANSELA = 0b00000100;
+    LATA0 = 1;
+    ANSELA = 0b00001100;
     ADCON0 = 0b00001001;
     ADCON1 = 0b01100000;
     ADCON2 = 0b00000000;  
@@ -93,7 +93,21 @@ int main(void) {
                        
         setShiftReg();      
         
-        RA0 = RA3;
+        if (getCurrent() > 100) {
+            
+            TMR0IE = 0;
+            output.FWD = 0;
+            output.REV = 0;
+            TMR0IF = 0;
+            pwmCount = gap;
+            phase = 1;
+            
+            for (byte count = 1; count <= 10; count++) {
+                LATA0 = count % 2;
+                _delaywdt(1000000);
+            }
+            
+        }
         
         CLRWDT();
         
@@ -128,25 +142,16 @@ void __interrupt() isr() {
                      
         }     
     }     
-    
-//    if (IOCIE && IOCIF) {
-//        IOCIF = 0;
-//        
-//        if (IOCAFbits.IOCAF3) {
-//            IOCAFbits.IOCAF3 = 0;              
-//            //if (RA3 == 0) RA0 = 0;
-//            
-//        }
-//        
-//    }
-       
+           
     return;
 }
 
 
 void updateSpeed() {
     
-    ADCON0bits.GO_nDONE = 1;
+    ADCON1 = 0b01100000;
+    ADCON0 = 0b00001011;
+    //ADCON0bits.GO_nDONE = 1;
     while (ADCON0bits.GO_nDONE);
     
     trainDirection = (ADRESH & 0x80) >> 7;    
@@ -186,6 +191,15 @@ void updateSpeed() {
     }    
 }
 
+word getCurrent() {
+    
+    ADCON1 = 0b11100000;
+    ADCON0 = 0b00001111;    
+    while (ADCON0bits.GO_nDONE);    
+    return ADRES;
+    
+}
+
 
 void setShiftReg() {
     
@@ -195,26 +209,26 @@ void setShiftReg() {
     do {
         
         if (buff & mask) {
-            RA4 = 1;
+            LATA4 = 1;
         } else {
-            RA4 = 0;
+            LATA4 = 0;
         }
         
         NOP();
-        RA5 = 1;
+        LATA5 = 1;
         NOP();
         NOP();
-        RA5 = 0;
+        LATA5 = 0;
         NOP();
         
         mask = mask >> 1;
     } while (mask > 0);
     
-    RA1 = 1;
+    LATA1 = 1;
     NOP();
     NOP();
-    RA1 = 0;
-    RA4 = 0;
-    RA5 = 0;
+    LATA1 = 0;
+    LATA4 = 0;
+    LATA5 = 0;
     
 }
