@@ -72,6 +72,7 @@ int main(void) {
     ADCON0 = 0b00001001;
     ADCON1 = 0b01100000;
     ADCON2 = 0b00000000;  
+    FVRCON = 0b00110000;
     
     // TIMER0 SETUP    
     OPTION_REG = 0b11011000;
@@ -84,33 +85,35 @@ int main(void) {
 //    IOCAF = 0b00001000;
 //    IOCIE = 1;
 //    TMR0IE = 0;
-    GIE = 1;
+    GIE = 0;
     
    
     while (1) {                        
         
-        updateSpeed(); 
-                       
+        //updateSpeed(); 
+               
+        output.shiftData = getTemp();
         setShiftReg();      
         
-        if (getCurrent() > 10) {
-            
-            GIE = 0;
-            output.FWD = 0;
-            output.REV = 0;
-            TMR0IF = 0;
-            pwmCount = gap;
-            phase = 1;
-            
-            for (byte count = 1; count <= 10; count++) {
-                LATA0 = 0;
-                _delaywdt(1000000);
-                LATA0 = 1;
-                _delaywdt(1000000);
-            }
-            GIE = 1;
-            
-        }
+        
+//        if (getCurrent() > 10) {
+//            
+//            GIE = 0;
+//            output.FWD = 0;
+//            output.REV = 0;
+//            TMR0IF = 0;
+//            pwmCount = gap;
+//            phase = 1;
+//            
+//            for (byte count = 1; count <= 10; count++) {
+//                LATA0 = 0;
+//                _delaywdt(1000000);
+//                LATA0 = 1;
+//                _delaywdt(1000000);
+//            }
+//            GIE = 1;
+//            
+//        }
         
         CLRWDT();
         
@@ -194,12 +197,12 @@ void updateSpeed() {
     }    
 }
 
-word getCurrent() {
+byte getTemp() {
     
-    ADCON1 = 0b11100000;
-    ADCON0 = 0b00001111;    
+    ADCON1 = 0b01100000;
+    ADCON0 = 0b01110111;    
     while (ADCON0bits.GO_nDONE);    
-    return ADRES;
+    return ADRES >> ;
     
 }
 
