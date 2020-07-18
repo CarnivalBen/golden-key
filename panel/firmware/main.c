@@ -1,23 +1,17 @@
 
-// PIC16F887 Configuration Bit Settings
+// PIC16F877A Configuration Bit Settings
 
 // 'C' source line config statements
 
-// CONFIG1
-#pragma config FOSC = HS        // Oscillator Selection bits (HS oscillator: High-speed crystal/resonator on RA6/OSC2/CLKOUT and RA7/OSC1/CLKIN)
+// CONFIG
+#pragma config FOSC = HS        // Oscillator Selection bits (HS oscillator)
 #pragma config WDTE = ON        // Watchdog Timer Enable bit (WDT enabled)
 #pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT disabled)
-#pragma config MCLRE = ON       // RE3/MCLR pin function select bit (RE3/MCLR pin function is MCLR)
-#pragma config CP = OFF         // Code Protection bit (Program memory code protection is disabled)
-#pragma config CPD = OFF        // Data Code Protection bit (Data memory code protection is disabled)
-#pragma config BOREN = ON       // Brown Out Reset Selection bits (BOR enabled)
-#pragma config IESO = ON        // Internal External Switchover bit (Internal/External Switchover mode is enabled)
-#pragma config FCMEN = ON       // Fail-Safe Clock Monitor Enabled bit (Fail-Safe Clock Monitor is enabled)
-#pragma config LVP = OFF        // Low Voltage Programming Enable bit (RB3 pin has digital I/O, HV on MCLR must be used for programming)
-
-// CONFIG2
-#pragma config BOR4V = BOR40V   // Brown-out Reset Selection bit (Brown-out Reset set to 4.0V)
-#pragma config WRT = OFF        // Flash Program Memory Self Write Enable bits (Write protection off)
+#pragma config BOREN = ON       // Brown-out Reset Enable bit (BOR enabled)
+#pragma config LVP = OFF        // Low-Voltage (Single-Supply) In-Circuit Serial Programming Enable bit (RB3 is digital I/O, HV on MCLR must be used for programming)
+#pragma config CPD = OFF        // Data EEPROM Memory Code Protection bit (Data EEPROM code protection off)
+#pragma config WRT = OFF        // Flash Program Memory Write Enable bits (Write protection off; all program memory may be written to by EECON control)
+#pragma config CP = OFF         // Flash Program Memory Code Protection bit (Code protection off)
 
 // #pragma config statements should precede project file includes.
 // Use project enums instead of #define for ON and OFF.
@@ -25,15 +19,24 @@
 #include <xc.h>
 #include "main.h"
 
+#define HALL_THRESHOLD 5
+
 void main(void) {
     
     TRISA = 0b11111111;
     TRISC = 0b00000000;    
+    TRISD = 0b00000000;    
     
+    byte v;
     while (1) {
-        
-        PORTC = getHallSensorValue(0);
-        
+        v = getHallSensorValue(0);
+        if (v > 128 + HALL_THRESHOLD || v < 127 - HALL_THRESHOLD) {
+            PORTD = 0xFF;
+        } else {
+            PORTD = 0;
+        }
+        //PORTD++;
+        _delaywdt(100000);
     }
     
     

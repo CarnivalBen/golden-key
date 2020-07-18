@@ -60,7 +60,6 @@ int main(void) {
     //TRISA0 = 0; // STATUS OUT
     //TRISA1 = 0; // LATCH
     //TRISA2 = 1; // SPEED POTENTIOMETER IN
-    //TRISA3 = 1; // OVERLOAD IN (always input)
     //TRISA4 = 0; // DATA OUT
     //TRISA5 = 0; // DATA CLK OUT
     TRISA = 0b00001100;
@@ -85,35 +84,13 @@ int main(void) {
 //    IOCAF = 0b00001000;
 //    IOCIE = 1;
 //    TMR0IE = 0;
-    GIE = 0;
+    GIE = 1;
     
    
     while (1) {                        
         
-        //updateSpeed(); 
-               
-        output.shiftData = getTemp();
-        setShiftReg();      
-        
-        
-//        if (getCurrent() > 10) {
-//            
-//            GIE = 0;
-//            output.FWD = 0;
-//            output.REV = 0;
-//            TMR0IF = 0;
-//            pwmCount = gap;
-//            phase = 1;
-//            
-//            for (byte count = 1; count <= 10; count++) {
-//                LATA0 = 0;
-//                _delaywdt(1000000);
-//                LATA0 = 1;
-//                _delaywdt(1000000);
-//            }
-//            GIE = 1;
-//            
-//        }
+        updateSpeed();
+        setShiftReg();              
         
         CLRWDT();
         
@@ -157,7 +134,7 @@ void updateSpeed() {
     
     ADCON1 = 0b01100000;
     ADCON0 = 0b00001011;
-    //ADCON0bits.GO_nDONE = 1;
+    
     while (ADCON0bits.GO_nDONE);
     
     trainDirection = (ADRESH & 0x80) >> 7;    
@@ -197,14 +174,7 @@ void updateSpeed() {
     }    
 }
 
-byte getTemp() {
-    
-    ADCON1 = 0b01100000;
-    ADCON0 = 0b01110111;    
-    while (ADCON0bits.GO_nDONE);    
-    return ADRES >> ;
-    
-}
+
 
 
 void setShiftReg() {
