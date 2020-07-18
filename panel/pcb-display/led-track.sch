@@ -724,8 +724,6 @@ F 3 "~" H 2200 2100 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	2200 1900 2200 1950
-Wire Wire Line
-	2200 2250 2200 3000
 $Comp
 L Device:R R?
 U 1 1 5F162A5C
@@ -842,82 +840,6 @@ Wire Wire Line
 	2200 5500 2200 4750
 Wire Wire Line
 	2200 4450 2200 4400
-Text HLabel 2650 3000 3    50   Input ~ 0
-SD-2G
-$Comp
-L Device:LED D?
-U 1 1 5F166F40
-P 2650 1750
-AR Path="/5EDE9CCF/5F166F40" Ref="D?"  Part="1" 
-AR Path="/5EDFD370/5F166F40" Ref="D?"  Part="1" 
-AR Path="/5F26BACE/5F166F40" Ref="D?"  Part="1" 
-AR Path="/5EEC90E0/5F166F40" Ref="D?"  Part="1" 
-AR Path="/5EFBFF7D/5F166F40" Ref="D?"  Part="1" 
-AR Path="/5F1399B4/5F166F40" Ref="D114"  Part="1" 
-F 0 "D114" V 2689 1632 50  0000 R CNN
-F 1 "GREEN" V 2598 1632 50  0000 R CNN
-F 2 "LEDs:LED_D5.0mm" H 2650 1750 50  0001 C CNN
-F 3 "~" H 2650 1750 50  0001 C CNN
-	1    2650 1750
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D?
-U 1 1 5F166F46
-P 2650 2100
-AR Path="/5EDE9CCF/5F166F46" Ref="D?"  Part="1" 
-AR Path="/5EDFD370/5F166F46" Ref="D?"  Part="1" 
-AR Path="/5F26BACE/5F166F46" Ref="D?"  Part="1" 
-AR Path="/5EEC90E0/5F166F46" Ref="D?"  Part="1" 
-AR Path="/5EFBFF7D/5F166F46" Ref="D?"  Part="1" 
-AR Path="/5F1399B4/5F166F46" Ref="D115"  Part="1" 
-F 0 "D115" V 2689 1982 50  0000 R CNN
-F 1 "GREEN" V 2598 1982 50  0000 R CNN
-F 2 "LEDs:LED_D5.0mm" H 2650 2100 50  0001 C CNN
-F 3 "~" H 2650 2100 50  0001 C CNN
-	1    2650 2100
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	2650 1900 2650 1950
-Wire Wire Line
-	2650 2250 2650 3000
-$Comp
-L Device:R R?
-U 1 1 5F166F5C
-P 2650 1350
-AR Path="/5EDE9CCF/5F166F5C" Ref="R?"  Part="1" 
-AR Path="/5EDFD370/5F166F5C" Ref="R?"  Part="1" 
-AR Path="/5F26BACE/5F166F5C" Ref="R?"  Part="1" 
-AR Path="/5EEC90E0/5F166F5C" Ref="R?"  Part="1" 
-AR Path="/5EFBFF7D/5F166F5C" Ref="R?"  Part="1" 
-AR Path="/5F1399B4/5F166F5C" Ref="R23"  Part="1" 
-F 0 "R23" V 2443 1350 50  0000 C CNN
-F 1 "4.7K" V 2534 1350 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 2580 1350 50  0001 C CNN
-F 3 "~" H 2650 1350 50  0001 C CNN
-	1    2650 1350
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	2650 1600 2650 1500
-$Comp
-L power:+12P #PWR?
-U 1 1 5F166F63
-P 2650 1100
-AR Path="/5EDE9CCF/5F166F63" Ref="#PWR?"  Part="1" 
-AR Path="/5EDFD370/5F166F63" Ref="#PWR?"  Part="1" 
-AR Path="/5F26BACE/5F166F63" Ref="#PWR?"  Part="1" 
-AR Path="/5EEC90E0/5F166F63" Ref="#PWR?"  Part="1" 
-AR Path="/5EFBFF7D/5F166F63" Ref="#PWR?"  Part="1" 
-AR Path="/5F1399B4/5F166F63" Ref="#PWR038"  Part="1" 
-F 0 "#PWR038" H 2650 950 50  0001 C CNN
-F 1 "+12P" H 2665 1273 50  0000 C CNN
-F 2 "" H 2650 1100 50  0001 C CNN
-F 3 "" H 2650 1100 50  0001 C CNN
-	1    2650 1100
-	1    0    0    -1  
-$EndComp
 $Comp
 L Device:LED D?
 U 1 1 5F166F6F
@@ -969,8 +891,6 @@ F 3 "~" H 2650 4250 50  0001 C CNN
 	1    2650 4250
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	2650 1200 2650 1100
 $Comp
 L Device:R R?
 U 1 1 5F166F82
@@ -4469,4 +4389,84 @@ Wire Wire Line
 	2050 7200 2100 7200
 Wire Wire Line
 	2400 7200 2500 7200
+Text HLabel 2650 3000 3    50   Input ~ 0
+SD-2G
+Wire Wire Line
+	2650 1200 2650 1100
+$Comp
+L power:+12P #PWR?
+U 1 1 5F166F63
+P 2650 1100
+AR Path="/5EDE9CCF/5F166F63" Ref="#PWR?"  Part="1" 
+AR Path="/5EDFD370/5F166F63" Ref="#PWR?"  Part="1" 
+AR Path="/5F26BACE/5F166F63" Ref="#PWR?"  Part="1" 
+AR Path="/5EEC90E0/5F166F63" Ref="#PWR?"  Part="1" 
+AR Path="/5EFBFF7D/5F166F63" Ref="#PWR?"  Part="1" 
+AR Path="/5F1399B4/5F166F63" Ref="#PWR038"  Part="1" 
+F 0 "#PWR038" H 2650 950 50  0001 C CNN
+F 1 "+12P" H 2665 1273 50  0000 C CNN
+F 2 "" H 2650 1100 50  0001 C CNN
+F 3 "" H 2650 1100 50  0001 C CNN
+	1    2650 1100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5F166F5C
+P 2650 1350
+AR Path="/5EDE9CCF/5F166F5C" Ref="R?"  Part="1" 
+AR Path="/5EDFD370/5F166F5C" Ref="R?"  Part="1" 
+AR Path="/5F26BACE/5F166F5C" Ref="R?"  Part="1" 
+AR Path="/5EEC90E0/5F166F5C" Ref="R?"  Part="1" 
+AR Path="/5EFBFF7D/5F166F5C" Ref="R?"  Part="1" 
+AR Path="/5F1399B4/5F166F5C" Ref="R23"  Part="1" 
+F 0 "R23" V 2443 1350 50  0000 C CNN
+F 1 "4.7K" V 2534 1350 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 2580 1350 50  0001 C CNN
+F 3 "~" H 2650 1350 50  0001 C CNN
+	1    2650 1350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2650 1600 2650 1500
+Wire Wire Line
+	2650 1900 2650 1950
+$Comp
+L Device:LED D?
+U 1 1 5F166F40
+P 2650 1750
+AR Path="/5EDE9CCF/5F166F40" Ref="D?"  Part="1" 
+AR Path="/5EDFD370/5F166F40" Ref="D?"  Part="1" 
+AR Path="/5F26BACE/5F166F40" Ref="D?"  Part="1" 
+AR Path="/5EEC90E0/5F166F40" Ref="D?"  Part="1" 
+AR Path="/5EFBFF7D/5F166F40" Ref="D?"  Part="1" 
+AR Path="/5F1399B4/5F166F40" Ref="D114"  Part="1" 
+F 0 "D114" V 2689 1632 50  0000 R CNN
+F 1 "GREEN" V 2598 1632 50  0000 R CNN
+F 2 "LEDs:LED_D5.0mm" H 2650 1750 50  0001 C CNN
+F 3 "~" H 2650 1750 50  0001 C CNN
+	1    2650 1750
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED D?
+U 1 1 5F166F46
+P 2650 2100
+AR Path="/5EDE9CCF/5F166F46" Ref="D?"  Part="1" 
+AR Path="/5EDFD370/5F166F46" Ref="D?"  Part="1" 
+AR Path="/5F26BACE/5F166F46" Ref="D?"  Part="1" 
+AR Path="/5EEC90E0/5F166F46" Ref="D?"  Part="1" 
+AR Path="/5EFBFF7D/5F166F46" Ref="D?"  Part="1" 
+AR Path="/5F1399B4/5F166F46" Ref="D115"  Part="1" 
+F 0 "D115" V 2689 1982 50  0000 R CNN
+F 1 "GREEN" V 2598 1982 50  0000 R CNN
+F 2 "LEDs:LED_D5.0mm" H 2650 2100 50  0001 C CNN
+F 3 "~" H 2650 2100 50  0001 C CNN
+	1    2650 2100
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	2650 2250 2650 3000
+Wire Wire Line
+	2200 2250 2200 3000
 $EndSCHEMATC

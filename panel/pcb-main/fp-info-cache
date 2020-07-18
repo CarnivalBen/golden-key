@@ -1,4 +1,4 @@
-148098333149166
+156091433155974
 Battery_Holders
 Bulgin_BX0036_1xC
 
@@ -51065,6 +51065,13 @@ Barrier_Terminal_P8.27_1x4
 4
 4
 carnivalben
+DIN_Socket_Edge_Solder_4pin
+
+
+0
+4
+4
+carnivalben
 Diode_Bridge_W08
 4-lead round diode bridge package, diameter 8.9mm, pin pitch 5.08mm, see http://cdn-reichelt.de/documents/datenblatt/A400/W005M-W10M_SEP.PDF
 diode bridge 8.9mm 8.85mm WOB pitch 5.08mm
@@ -51093,9 +51100,37 @@ tact sw push 6mm
 4
 4
 carnivalben
+TRK22X3-XXDC
+
+
+0
+8
+8
+carnivalben
 TrimPot_RM065
 
 
 0
 3
 3
+carnivalben
+Wire_Pads_Edge_1x2
+
+
+0
+2
+2
+carnivalben
+Wire_Pads_Edge_2x3
+
+
+0
+6
+6
+carnivalben
+Wire_Pads_Edge_2x8
+
+
+0
+16
+16
