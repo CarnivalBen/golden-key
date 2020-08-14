@@ -7,14 +7,14 @@
       "Application": "Pcbnew",
       "Version":     "(5.1.6)-1"
     },
-    "CreationDate":  "2020-08-11T15:09:09+01:00"
+    "CreationDate":  "2020-08-11T14:57:58+01:00"
   },
   "GeneralSpecs":
   {
     "ProjectId":
     {
-      "Name": "panel-display",
-      "GUID": "70616e65-6c2d-4646-9973-706c61792e6b",
+      "Name": "panel-main",
+      "GUID": "70616e65-6c2d-46d6-9169-6e2e6b696361",
       "Revision": "rev?"
     },
     "Size":
@@ -38,37 +38,37 @@
   "FilesAttributes":
   [
     {
-      "Path":  "panel-display-F_Cu.gbr",
+      "Path":  "panel-main-F_Cu.gbr",
       "FileFunction":  "Copper,L1,Top",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "panel-display-B_Cu.gbr",
+      "Path":  "panel-main-B_Cu.gbr",
       "FileFunction":  "Copper,L2,Bot",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "panel-display-F_SilkS.gbr",
+      "Path":  "panel-main-F_SilkS.gbr",
       "FileFunction":  "Legend,Top",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "panel-display-B_SilkS.gbr",
+      "Path":  "panel-main-B_SilkS.gbr",
       "FileFunction":  "Legend,Bot",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "panel-display-F_Mask.gbr",
+      "Path":  "panel-main-F_Mask.gbr",
       "FileFunction":  "SolderMask,Top",
       "FilePolarity":  "Negative"
     },
     {
-      "Path":  "panel-display-B_Mask.gbr",
+      "Path":  "panel-main-B_Mask.gbr",
       "FileFunction":  "SolderMask,Bot",
       "FilePolarity":  "Negative"
     },
     {
-      "Path":  "panel-display-Edge_Cuts.gbr",
+      "Path":  "panel-main-Edge_Cuts.gbr",
       "FileFunction":  "Profile",
       "FilePolarity":  "Positive"
     }
