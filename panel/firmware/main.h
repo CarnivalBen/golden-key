@@ -167,7 +167,7 @@ typedef union {
         unsigned active : 1;
         unsigned shortpress : 1;
         unsigned longpress : 1;
-        unsigned voidpress : 1;
+        unsigned lock : 1;
         unsigned : 4;
         word timer;
     } status;

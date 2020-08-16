@@ -37,19 +37,62 @@ void main(void) {
     TRISD = 0b11111111;   
     TRISE = 0b00000000;
     
-    OPTION_REG = 0b10000110;
+    OPTION_REG = 0b10000010;
     INTCON = 0b10100000;
     
     
     while (1) {
+        CLRWDT();
+        _delaywdt(100);
         
+        GIE = 0;
         RB0 = pushbuttons.buttons.pl2;
         RB1 = pushbuttons.buttons.pl1;
         RB2 = pushbuttons.status.active;
         RB3 = pushbuttons.status.shortpress;
         RB4 = pushbuttons.status.longpress;
-        RB5 = pushbuttons.status.voidpress;
+
+//        PORTB = pushbuttons.status.timer >> 8;
         
+//        if (pushbuttons.status.shortpress || pushbuttons.status.longpress) {            
+//            while (1) CLRWDT();
+//            
+//        }
+        GIE = 1;
+        
+        if (pushbuttons.status.shortpress && pushbuttons.buttons.pl1) {
+            for (byte x = 0; x < 10; x++) {
+                RB6 = x % 2;
+                _delaywdt(900000);
+            }
+            RB6 = 0;
+            pushbuttons.status.shortpress = 0;
+        }
+
+        if (pushbuttons.status.longpress && pushbuttons.buttons.pl1) {
+            for (byte x = 0; x < 10; x++) {
+                RB7 = x % 2;
+                _delaywdt(900000);
+            }
+            RB7 = 0;
+            pushbuttons.status.longpress = 0;
+        }
+        
+        if (pushbuttons.status.shortpress && pushbuttons.buttons.pl2) {
+            
+            RB6 = 1;
+            _delaywdt(9000000);            
+            RB6 = 0;
+            pushbuttons.status.shortpress = 0;
+        }
+
+        if (pushbuttons.status.longpress && pushbuttons.buttons.pl2) {
+            
+            RB7 = 1;
+            _delaywdt(9000000);
+            RB7 = 0;
+            pushbuttons.status.longpress = 0;
+        }
         
     }
     
@@ -77,23 +120,27 @@ void __interrupt() isr() {
     if (TMR0IE && TMR0IF) {
         TMR0IF = 0;
                 
+        
         if (pushbuttons.status.shortpress) goto tmr0Done;
         if (pushbuttons.status.longpress) goto tmr0Done;
         
         // SOME BUTTON IS PRESSED
         if (PORTD || (PORTC & 0b00110000)) {   
             
+            if (pushbuttons.status.lock) goto tmr0Done;
+            
             // IN THE MIDDLE OF SOME ACTIVE PRESS
             if (pushbuttons.status.active) {
                 
-                // THE SAME BUTTON IS STILL PRESSED
-                if (pushbuttons.registers.portd == PORTD && pushbuttons.registers.portc == (PORTC & 0b00110000)) {
-                    pushbuttons.status.timer++;
-                    
-                // PRESS HAS SWITCHED TO ANOTHER BUTTON
-                } else {
-                    pushbuttons.status.voidpress = 1;
+                pushbuttons.status.timer++;                
+
+                if (pushbuttons.status.timer > 2438) {
+                    pushbuttons.status.longpress = 1;
+                    pushbuttons.status.active = 0;
+                    pushbuttons.status.lock = 1;
                 }
+                    
+
                 
             // THIS IS A NEW PRESS
             } else {
@@ -105,22 +152,13 @@ void __interrupt() isr() {
             
         // NO BUTTON IS PRESSED
         } else {
-            
-            // PRESS IS VOIDED - RESET
-            if (pushbuttons.status.voidpress) {
-                pushbuttons.status.active = 0;
-                pushbuttons.status.voidpress = 0;
-                goto tmr0Done;
-                
-            }
-            
+
+            pushbuttons.status.lock = 0;
+
             // PRESS COMPLETE
             if (pushbuttons.status.active) {
                 
-                if (pushbuttons.status.timer > 0x1000)
-                    pushbuttons.status.longpress = 1;
-                
-                else if (pushbuttons.status.timer > 0x0100)
+                if (pushbuttons.status.timer > 30)
                     pushbuttons.status.shortpress = 1;
                 
                 pushbuttons.status.active = 0;
