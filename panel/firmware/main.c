@@ -20,9 +20,21 @@
 #include "main.h"
 
 #define HALL_THRESHOLD 5
+#define CHARGE_PUMP_MAX 240
+#define POINTS_COIL_ON_TIME 100
+
+#define setRed(segment) shifter.display.segment##r = 1; shifter.display.segment##g = 0
+#define setGreen(segment) shifter.display.segment##g = 1; shifter.display.segment##r = 0
+#define setYellow(segment) shifter.display.segment##r = 1; shifter.display.segment##g = 1
+#define setOff(segment) shifter.display.segment##g = 0; shifter.display.segment##r = 0
+#define feedsOff() shifter.data[0] = 0; shifter.feeds.i = 0
 
 shifter_t shifter;
 volatile pushbutton_t pushbuttons;
+isolatedfeeds_t isolatedfeeds;
+points_t points;
+byte fiddleYardPosition = 0;
+word runningTimer = 1;
 
 
 
@@ -39,108 +51,535 @@ void main(void) {
     
     OPTION_REG = 0b10000010;
     INTCON = 0b10100000;
-    
-    
-    while (1) {
-        CLRWDT();
-        _delaywdt(100);
         
-        GIE = 0;
-        RB0 = pushbuttons.buttons.pl2;
-        RB1 = pushbuttons.buttons.pl1;
-        RB2 = pushbuttons.status.active;
-        RB3 = pushbuttons.status.shortpress;
-        RB4 = pushbuttons.status.longpress;
-
-//        PORTB = pushbuttons.status.timer >> 8;
+    while (1) {        
         
-//        if (pushbuttons.status.shortpress || pushbuttons.status.longpress) {            
-//            while (1) CLRWDT();
-//            
-//        }
-        GIE = 1;
-        
-        if (pushbuttons.status.shortpress && pushbuttons.buttons.pl1) {
-            for (byte x = 0; x < 10; x++) {
-                RB6 = x % 2;
-                _delaywdt(900000);
-            }
-            RB6 = 0;
-            pushbuttons.status.shortpress = 0;
-        }
-
-        if (pushbuttons.status.longpress && pushbuttons.buttons.pl1) {
-            for (byte x = 0; x < 10; x++) {
-                RB7 = x % 2;
-                _delaywdt(900000);
-            }
-            RB7 = 0;
-            pushbuttons.status.longpress = 0;
-        }
-        
-        if (pushbuttons.status.shortpress && pushbuttons.buttons.pl2) {
+        _delaywdt(1001);
+        processFiddleYard();
+        processButtons();
+              
+        if (getChargePumpVoltage() < CHARGE_PUMP_MAX) {
+            RB4 = 1;
+            if (RC3) RC3 = 0; else RC3 = 1;
             
-            RB6 = 1;
-            _delaywdt(9000000);            
-            RB6 = 0;
-            pushbuttons.status.shortpress = 0;
-        }
-
-        if (pushbuttons.status.longpress && pushbuttons.buttons.pl2) {
-            
-            RB7 = 1;
-            _delaywdt(9000000);
-            RB7 = 0;
-            pushbuttons.status.longpress = 0;
+        } else {
+            RB4 = 0;
+            RC3 = 0;
         }
         
+        runningTimer--;
+        if (runningTimer == 0) {
+            if (RB3 == 0)
+                RB3 = 1;
+            else
+                RB3 = 0;
+        }
+    }
+}
+
+void processFiddleYard() {
+        
+    if (getHallSensorStatus(2) && fiddleYardPosition != 3) {
+        RB5 = 1;
+        fiddleYardPosition = 3;
+        shifter.feeds.e = (shifter.feeds.a && isolatedfeeds.e) ? 1 : 0;
+        shifter.feeds.f = 0;
+        shifter.feeds.g = 0;
+        updateDisplay();
+        
+    } else if (getHallSensorStatus(1) && fiddleYardPosition != 2) {
+        RB5 = 1;
+        fiddleYardPosition = 2;
+        shifter.feeds.e = 0;
+        shifter.feeds.f = (shifter.feeds.a && isolatedfeeds.f) ? 1 : 0;
+        shifter.feeds.g = 0;
+        updateDisplay();
+        
+    } else if (getHallSensorStatus(0) && fiddleYardPosition != 1) {
+        RB5 = 1;
+        fiddleYardPosition = 1;
+        shifter.feeds.e = 0;
+        shifter.feeds.f = 0;
+        shifter.feeds.g = (shifter.feeds.a && isolatedfeeds.g) ? 1 : 0;
+        updateDisplay();
+        
+    }  
+    RB5 = 0;
+}
+
+void processButtons() {
+    
+    if (pushbuttons.status.shortpress) {
+        RB5 = 1;
+        
+        if (pushbuttons.buttons.aux1) {            
+            if (shifter.feeds.aux1) {
+                shifter.feeds.aux1 = 0;
+                RC6 = 0;
+            } else {
+                shifter.feeds.aux1 = 1;
+                RC6 = 1;
+            }
+            refreshShifter();
+            
+        }
+        
+        if (pushbuttons.buttons.aux2) {            
+            if (shifter.feeds.aux2) {
+                shifter.feeds.aux2 = 0; 
+                RC7 = 0;
+            } else {
+                shifter.feeds.aux2 = 1;
+                RC7 = 1;
+            }
+            refreshShifter();
+        }
+        
+        if (pushbuttons.buttons.sd) {            
+            feedsOff();
+            if (points.p4 == FRONT) switchPoints(4, BACK);
+            if (points.p5 == FRONT) switchPoints(5, BACK);            
+            shifter.feeds.d = 1;
+            shifter.feeds.h = !points.p8 ? isolatedfeeds.h : 0;
+            updateDisplay();
+        }
+        
+        if (pushbuttons.buttons.mle) {
+            feedsOff();
+            if (points.p4 == BACK) switchPoints(4, FRONT);
+            if (points.p5 == FRONT) switchPoints(5, BACK); 
+            shifter.feeds.d = 1;
+            shifter.feeds.h = !points.p8 ? isolatedfeeds.h : 0;
+            updateDisplay();
+        }
+        
+        if (pushbuttons.buttons.dk) {
+            feedsOff();
+            if (points.p8 == FRONT) switchPoints(8, BACK);
+            if (points.p5 == FRONT) {
+                if (points.p6 == FRONT) switchPoints(6, BACK);
+                if (points.p3 == BACK) {
+                    shifter.feeds.i = isolatedfeeds.i;
+                } else {
+                    if (points.p2 == FRONT) switchPoints(2, BACK);
+                }
+            }
+            if (points.p5 == FRONT && points.p3 == FRONT) shifter.feeds.b = 1;
+            if (points.p5 == FRONT) shifter.feeds.c = 1;
+            shifter.feeds.d = 1;
+            updateDisplay();
+        }
+        
+        if (pushbuttons.buttons.mlw) {
+            feedsOff();
+            if (points.p8 == BACK) switchPoints(8, FRONT);
+            if (points.p5 == FRONT) {
+                if (points.p6 == FRONT) switchPoints(6, BACK);
+                if (points.p3 == BACK) {
+                    shifter.feeds.i = isolatedfeeds.i;
+                } else {
+                    if (points.p2 == FRONT) switchPoints(2, BACK);
+                }
+            }
+            if (points.p5 == FRONT && points.p3 == FRONT) shifter.feeds.b = 1;
+            if (points.p5 == FRONT) shifter.feeds.c = 1;
+            shifter.feeds.d = 1;
+            shifter.feeds.h = isolatedfeeds.h;
+            updateDisplay();
+        }
+        
+        if (pushbuttons.buttons.gs) {
+            feedsOff();
+            if (points.p1 == BACK) switchPoints(1, FRONT);
+            if (points.p7 == BACK) switchPoints(7, FRONT);
+            shifter.feeds.a = 1;
+            if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
+            if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
+            if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+            updateDisplay();
+        }
+        
+        if (pushbuttons.buttons.pl2) {
+            feedsOff();
+            if (points.p3 == FRONT) switchPoints(3, BACK);
+            if (points.p6 == FRONT) {
+                if (points.p7 == FRONT) switchPoints(7, BACK);
+            } else {
+                if (points.p5 == BACK) switchPoints(5, FRONT);                
+            }
+            shifter.feeds.c = 1;
+            if (points.p6 == BACK) {
+                shifter.feeds.d = 1;
+                if (points.p8 == FRONT) shifter.feeds.h = isolatedfeeds.h;
+            } else {
+                shifter.feeds.a = 1;
+                if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
+                if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
+                if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+            }
+            shifter.feeds.i = isolatedfeeds.i;
+            updateDisplay();
+        }
+        
+        if (pushbuttons.buttons.pl1) {
+            if (shifter.feeds.b) {
+                feedsOff();
+                if (points.p2 == FRONT) {
+                    switchPoints(2, BACK);
+                    if (points.p3 == BACK) switchPoints(3, FRONT);
+                    if (points.p6 == FRONT) {
+                        if (points.p7 == FRONT) switchPoints(7, BACK);
+                        shifter.feeds.b = 1;
+                        shifter.feeds.c = 1;
+                        if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
+                        if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
+                        if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                        
+                    } else {
+                        if (points.p5 == BACK) switchPoints(5, FRONT);
+                        shifter.feeds.b = 1;
+                        shifter.feeds.c = 1;
+                        shifter.feeds.d = 1;
+                        if (points.p8 == FRONT) shifter.feeds.h = isolatedfeeds.h;
+                        
+                    }                    
+                    
+                } else {
+                    switchPoints(2, FRONT);
+                    if (points.p1 == FRONT) switchPoints(1, BACK);
+                    if (points.p7 == BACK) switchPoints(7, FRONT);
+                    shifter.feeds.b = 1;
+                    shifter.feeds.a = 1;
+                    if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
+                    if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
+                    if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                    
+                }
+                
+            } else {
+                feedsOff();
+                if (points.p2 == FRONT) {
+                    if (points.p1 == FRONT) switchPoints(1, BACK);
+                    if (points.p7 == BACK) switchPoints(7, FRONT);
+                    shifter.feeds.b = 1;
+                    shifter.feeds.a = 1;
+                    if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
+                    if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
+                    if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                    
+                } else {
+                    if (points.p3 == BACK) switchPoints(3, FRONT);
+                    if (points.p6 == FRONT) {
+                        if (points.p7 == FRONT) switchPoints(7, BACK);
+                        shifter.feeds.b = 1;
+                        shifter.feeds.c = 1;
+                        if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
+                        if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
+                        if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                        
+                    } else {
+                        if (points.p5 == BACK) switchPoints(5, FRONT);
+                        shifter.feeds.b = 1;
+                        shifter.feeds.c = 1;
+                        shifter.feeds.d = 1;
+                        if (points.p8 == FRONT) shifter.feeds.h = isolatedfeeds.h;
+                        
+                    }
+                }
+                
+            }
+            updateDisplay();
+        }
+        
+        if (pushbuttons.buttons.fy) {
+            if (shifter.feeds.a) {
+                feedsOff();
+                if (points.p7 == BACK) {
+                    switchPoints(7, FRONT);
+                    if (points.p1 == BACK) {
+                        if (points.p2 == BACK) switchPoints(2, FRONT);
+                        shifter.feeds.b = 1;                                                
+                    }
+                    
+                } else {
+                    switchPoints(7, BACK);
+                    if (points.p6 == BACK) switchPoints(6, FRONT);
+                    if (points.p3 == FRONT) {
+                        if (points.p2 == FRONT) switchPoints(2, BACK);
+                        shifter.feeds.b = 1;
+                    } else {
+                        shifter.feeds.i = isolatedfeeds.i;
+                    }
+                }
+                
+            } else {
+                feedsOff();
+                if (points.p7 == FRONT) {
+                    if (points.p1 == BACK) {
+                        if (points.p2 == BACK) switchPoints(2, FRONT);
+                        shifter.feeds.b = 1;
+                                                
+                    }
+                    
+                } else {
+                    if (points.p6 == BACK) switchPoints(6, FRONT);
+                    if (points.p3 == FRONT) {
+                        if (points.p2 == FRONT) switchPoints(2, BACK);
+                        shifter.feeds.b = 1;
+                    } else {
+                        shifter.feeds.i = isolatedfeeds.i;
+                    }
+                }
+                
+            }
+            shifter.feeds.a = 1;
+            if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
+            if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
+            if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;                        
+            updateDisplay();
+        }
+        
+        pushbuttons.status.shortpress = 0;
+        RB5 = 0;
     }
     
-    
-    //refreshShifter();
-//    
-//    byte v;
-//    while (1) {
-//        v = getHallSensorValue(0);
-//        if (v > 128 + HALL_THRESHOLD || v < 127 - HALL_THRESHOLD) {
-//            PORTD = 0xFF;
-//        } else {
-//            PORTD = 0;
-//        }
-//        //PORTD++;
-//        _delaywdt(100000);
-//    }
-    
+    if (pushbuttons.status.longpress) {
+        RB5 = 1;
+        
+        if (pushbuttons.buttons.mlw) {
+            if (isolatedfeeds.h == 0) isolatedfeeds.h = 1; else isolatedfeeds.h = 0;
+            pushbuttons.status.shortpress = 1;
+        }
+        
+        if (pushbuttons.buttons.pl2) {
+            if (isolatedfeeds.i == 0) isolatedfeeds.i = 1; else isolatedfeeds.i = 0;
+            pushbuttons.status.shortpress = 1;
+        }
+        
+        if (pushbuttons.buttons.fy) {
+            if (fiddleYardPosition = 1) if (isolatedfeeds.g == 0) isolatedfeeds.g = 1; else isolatedfeeds.g = 0;
+            if (fiddleYardPosition = 2) if (isolatedfeeds.f == 0) isolatedfeeds.f = 1; else isolatedfeeds.f = 0;
+            if (fiddleYardPosition = 3) if (isolatedfeeds.e == 0) isolatedfeeds.e = 1; else isolatedfeeds.e = 0;                  
+            pushbuttons.status.shortpress = 1;
+        }
+        
+        pushbuttons.status.longpress = 0;
+        RB5 = 0;
+    }
     
 }
 
+void updateDisplay() {
+    
+    if (shifter.feeds.a) {
+        setGreen(fy6);
+        switch (fiddleYardPosition) {
+            case 1:
+                setRed(fy1);
+                setRed(fy2);
+                if (shifter.feeds.g) { setGreen(fy3); } else { setRed(fy3); }
+                setOff(fy4);
+                setOff(fy5);
+                break;
+                
+            case 2:
+                setOff(fy1);
+                setRed(fy2);
+                if (shifter.feeds.f) { setGreen(fy3); } else { setRed(fy3); }
+                setRed(fy4);
+                setOff(fy5);
+                break;
+
+            case 3:
+                setOff(fy1);
+                setOff(fy2);
+                if (shifter.feeds.e) { setGreen(fy3); } else { setRed(fy3); }
+                setRed(fy4);
+                setRed(fy5);
+                break;
+        }
+        
+        if (points.p7) {
+            setGreen(lp5);
+            setRed(lp1);
+            setRed(gs1);
+                                
+        } else {
+            setGreen(lp1);
+            setRed(lp5);
+
+            if (points.p1) {
+                setRed(gs1);
+                
+            } else {
+                setGreen(gs1);
+            }
+
+        }
+        
+    } else {        
+        setRed(fy6);
+        setRed(fy3);
+        setRed(lp5);
+        setRed(lp1);
+        setRed(gs1);
+        
+        switch (fiddleYardPosition) {
+            case 1:
+                setRed(fy1);
+                setRed(fy2);
+                setOff(fy4);
+                setOff(fy5);
+                break;
+
+            case 2:
+                setOff(fy1);
+                setRed(fy2);
+                setRed(fy4);
+                setOff(fy5);
+                break;
+
+            case 3:
+                setOff(fy1);
+                setOff(fy2);
+                setRed(fy4);
+                setRed(fy5);
+                break;                
+        }
+    }
+    
+    if (shifter.feeds.b) {
+        setGreen(pl11);
+        
+        if (points.p2) {
+            setGreen(lp3);
+            setRed(lp2);
+        } else {
+            setGreen(lp2);
+            setRed(lp3);
+        }
+        
+    } else {
+        setRed(pl11);
+        setRed(lp2);
+        setRed(lp3);        
+    }
+    
+    if (shifter.feeds.c) {
+        setGreen(lp4);
+        
+        if (points.p3) {
+            setGreen(pl21);
+            if (shifter.feeds.i) { setGreen(pl22); } else { setRed(pl22); }
+            
+        } else {
+            setRed(pl21);
+            setRed(pl22);
+            
+        }
+        
+    } else {
+        setRed(lp4);
+        setRed(pl21);
+        setRed(pl22);
+    }
+    
+    if (shifter.feeds.d) {
+        setGreen(mlw3);
+        
+        if (points.p5) {
+            setGreen(mle2);
+            setRed(mlw4);
+            
+            if (points.p4) {
+                setGreen(sd1);
+                setGreen(sd2);
+                setRed(mle1);
+                
+            } else {
+                setGreen(mle1);
+                setRed(sd1);
+                setRed(sd2);                
+            }
+            
+        } else {
+            setGreen(mlw4);            
+            setRed(mle1);
+            setRed(mle2);
+            setRed(sd1);
+            setRed(sd2);
+            
+        }
+        
+        if (points.p8) {
+            setGreen(dk1);
+            setRed(mlw1);
+            setRed(mlw2);
+            
+        } else {
+            setGreen(mlw2);
+            setRed(dk1);            
+            if (shifter.feeds.h) { setGreen(mlw1); } else { setRed(mlw1); }
+            
+        }
+        
+    } else {
+        setRed(mlw1);
+        setRed(mlw2);
+        setRed(mlw3);
+        setRed(mlw4);
+        setRed(dk1);
+        setRed(mle1);
+        setRed(mle2);
+        setRed(sd1);
+        setRed(sd2);
+    }
+    
+    refreshShifter();
+}
+
+void switchPoints(byte id, byte direction) {
+    
+    byte *coilselect = direction ? &shifter.points.front : &shifter.points.back;
+    
+    charge();    
+    
+    *coilselect = 1 << (id - 1);  
+    refreshShifter();
+
+    _delaywdt(POINTS_COIL_ON_TIME);
+
+    *coilselect = 0;
+    refreshShifter();
+        
+    if (direction) {
+        points.data |= 1 << (id - 1);
+    } else {
+        points.data &= ~(1 << (id - 1));
+    }
+}
 
 void __interrupt() isr() {
     
     if (TMR0IE && TMR0IF) {
-        TMR0IF = 0;
-                
+        TMR0IF = 0;               
         
         if (pushbuttons.status.shortpress) goto tmr0Done;
         if (pushbuttons.status.longpress) goto tmr0Done;
         
         // SOME BUTTON IS PRESSED
-        if (PORTD || (PORTC & 0b00110000)) {   
-            
+        if (PORTD || (PORTC & 0b00110000)) {              
             if (pushbuttons.status.lock) goto tmr0Done;
             
             // IN THE MIDDLE OF SOME ACTIVE PRESS
-            if (pushbuttons.status.active) {
-                
+            if (pushbuttons.status.active) {                
                 pushbuttons.status.timer++;                
 
                 if (pushbuttons.status.timer > 2438) {
                     pushbuttons.status.longpress = 1;
                     pushbuttons.status.active = 0;
                     pushbuttons.status.lock = 1;
-                }
-                    
-
+                }           
                 
             // THIS IS A NEW PRESS
             } else {
@@ -152,7 +591,6 @@ void __interrupt() isr() {
             
         // NO BUTTON IS PRESSED
         } else {
-
             pushbuttons.status.lock = 0;
 
             // PRESS COMPLETE
@@ -161,37 +599,47 @@ void __interrupt() isr() {
                 if (pushbuttons.status.timer > 30)
                     pushbuttons.status.shortpress = 1;
                 
-                pushbuttons.status.active = 0;
-                
+                pushbuttons.status.active = 0;                
             }
-        }
-        
+        }        
     }     
     tmr0Done:     
     
     return;
 }
 
-
-
-
-
-void buttonPush(byte id, byte longPress) {
+byte getChargePumpVoltage() {
     
+    ADCON1 = 0b00000010;
+    ADCON0 = 0b10011101;
+    while (ADCON0bits.GO_nDONE);
     
+    return ADRESH;    
     
 }
 
-byte getHallSensorValue(byte id) {
+void charge() {
+       
+    while (getChargePumpVoltage() < CHARGE_PUMP_MAX) {
+        RB4 = 1;
+        RC3 = 1;
+        _delaywdt(1001);
+        RC3 = 0;
+        _delaywdt(1001);
+    }
+    RB4 = 0;
+}
+
+byte getHallSensorStatus(byte id) {
     
     byte channelSelect = id << 3;    
     
-    ADCON1 = 0b01000100;
+    ADCON1 = 0b00000010;
     ADCON0 = 0b10000101 | channelSelect;
     while (ADCON0bits.GO_nDONE);
     
-    return ADRESH;
-    
+    return (ADRESH > 128 + HALL_THRESHOLD || ADRESH < 127 - HALL_THRESHOLD) ? 1 : 0;
+        
 }
 
 void refreshShifter() {

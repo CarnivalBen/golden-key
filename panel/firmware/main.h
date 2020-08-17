@@ -16,6 +16,9 @@ extern "C" {
 typedef unsigned char byte;
 typedef unsigned int word;
 
+#define BACK 1
+#define FRONT 0
+
 typedef union {
 
     struct {
@@ -43,23 +46,25 @@ typedef union {
         unsigned    : 8;
         unsigned    : 8;
         
-        unsigned b1 : 1;
-        unsigned b2 : 1;
-        unsigned b3 : 1;
-        unsigned b4 : 1;
-        unsigned b5 : 1;
-        unsigned b6 : 1;
-        unsigned b7 : 1;
-        unsigned b8 : 1;
-        
-        unsigned f1 : 1;
-        unsigned f2 : 1;
-        unsigned f3 : 1;
-        unsigned f4 : 1;
-        unsigned f5 : 1;
-        unsigned f6 : 1;
-        unsigned f7 : 1;
-        unsigned f8 : 1;
+        byte back;
+        byte front;
+//        unsigned b1 : 1;
+//        unsigned b2 : 1;
+//        unsigned b3 : 1;
+//        unsigned b4 : 1;
+//        unsigned b5 : 1;
+//        unsigned b6 : 1;
+//        unsigned b7 : 1;
+//        unsigned b8 : 1;
+//        
+//        unsigned f1 : 1;
+//        unsigned f2 : 1;
+//        unsigned f3 : 1;
+//        unsigned f4 : 1;
+//        unsigned f5 : 1;
+//        unsigned f6 : 1;
+//        unsigned f7 : 1;
+//        unsigned f8 : 1;
         
     } points;
     
@@ -175,9 +180,38 @@ typedef union {
 } pushbutton_t;
 
 
-byte getHallSensorValue(byte id);
+typedef union {
+    struct {
+        unsigned p1 : 1;
+        unsigned p2 : 1;
+        unsigned p3 : 1;
+        unsigned p4 : 1;
+        unsigned p5 : 1;
+        unsigned p6 : 1;
+        unsigned p7 : 1;
+        unsigned p8 : 1;
+    };
+    byte data;
+} points_t;
+
+typedef union {
+    struct {
+        unsigned e : 1;
+        unsigned f : 1;
+        unsigned g : 1;
+        unsigned h : 1;
+        unsigned i : 1;
+    };    
+} isolatedfeeds_t;
+
+byte getHallSensorStatus(byte id);
+byte getChargePumpVoltage(void);
 void refreshShifter(void);
-void checkButtons(void);
+void processButtons(void);
+void processFiddleYard(void);
+void charge(void);
+void switchPoints(byte id, byte direction);
+void updateDisplay(void);
 
 #ifdef	__cplusplus
 }
