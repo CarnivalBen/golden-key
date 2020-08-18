@@ -52,6 +52,9 @@ void main(void) {
     OPTION_REG = 0b10000010;
     INTCON = 0b10100000;
         
+    
+    initialise();
+    
     while (1) {        
         
         _delaywdt(1001);
@@ -75,6 +78,55 @@ void main(void) {
                 RB3 = 0;
         }
     }
+}
+
+
+void initialise() {
+    
+    shifter_t lastShifter;
+    points_t lastPoints;
+    
+    for(byte b = 0; b < 10; b++) {
+        lastShifter.data[b] = EEPROM_READ(b);
+        shifter.data[b] = 0;
+    }    
+    refreshShifter();
+    
+    lastPoints.data = EEPROM_READ(10);
+    isolatedfeeds.data = EEPROM_READ(11);
+    
+    shifter.feeds.aux1 = lastShifter.feeds.aux1;
+    shifter.feeds.aux2 = lastShifter.feeds.aux2;
+    RC6 = shifter.feeds.aux1;
+    RC7 = shifter.feeds.aux2;
+    
+    switchPoints(1, lastPoints.p1);
+    switchPoints(2, lastPoints.p2);
+    switchPoints(3, lastPoints.p3);
+    switchPoints(4, lastPoints.p4);
+    switchPoints(5, lastPoints.p5);
+    switchPoints(6, lastPoints.p6);
+    switchPoints(7, lastPoints.p7);
+    switchPoints(8, lastPoints.p8);
+
+    shifter.feeds.a = lastShifter.feeds.a;
+    shifter.feeds.b = lastShifter.feeds.b;
+    shifter.feeds.c = lastShifter.feeds.c;
+    shifter.feeds.d = lastShifter.feeds.d;
+    shifter.feeds.e = 0;
+    shifter.feeds.f = 0;
+    shifter.feeds.g = 0;
+    shifter.feeds.h = lastShifter.feeds.h;
+    shifter.feeds.i = lastShifter.feeds.i;
+        
+    fiddleYardPosition = 0;
+    
+    pushbuttons.status.active = 0;
+    pushbuttons.status.lock = 0;
+    pushbuttons.status.longpress = 0;
+    pushbuttons.status.shortpress = 0;
+    pushbuttons.status.timer = 0;
+    
 }
 
 void processFiddleYard() {
@@ -103,14 +155,22 @@ void processFiddleYard() {
         shifter.feeds.g = (shifter.feeds.a && isolatedfeeds.g) ? 1 : 0;
         updateDisplay();
         
-    }  
+    } else if (!getHallSensorStatus(0) && !getHallSensorStatus(1) && !getHallSensorStatus(2) && fiddleYardPosition != 0) {
+        fiddleYardPosition = 0;
+        shifter.feeds.e = 0;
+        shifter.feeds.f = 0;
+        shifter.feeds.g = 0;
+        updateDisplay();
+
+    }
+    
     RB5 = 0;
 }
 
 void processButtons() {
     
     if (pushbuttons.status.shortpress) {
-        RB5 = 1;
+        RB5 = 1;                
         
         if (pushbuttons.buttons.aux1) {            
             if (shifter.feeds.aux1) {
@@ -193,9 +253,9 @@ void processButtons() {
             if (points.p1 == BACK) switchPoints(1, FRONT);
             if (points.p7 == BACK) switchPoints(7, FRONT);
             shifter.feeds.a = 1;
-            if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
-            if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
-            if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+            if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
+            if (fiddleYardPosition == 2) shifter.feeds.f = isolatedfeeds.f;
+            if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;
             updateDisplay();
         }
         
@@ -213,9 +273,9 @@ void processButtons() {
                 if (points.p8 == FRONT) shifter.feeds.h = isolatedfeeds.h;
             } else {
                 shifter.feeds.a = 1;
-                if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
-                if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
-                if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
+                if (fiddleYardPosition == 2) shifter.feeds.f = isolatedfeeds.f;
+                if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;
             }
             shifter.feeds.i = isolatedfeeds.i;
             updateDisplay();
@@ -231,9 +291,9 @@ void processButtons() {
                         if (points.p7 == FRONT) switchPoints(7, BACK);
                         shifter.feeds.b = 1;
                         shifter.feeds.c = 1;
-                        if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
-                        if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
-                        if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                        if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
+                        if (fiddleYardPosition == 2) shifter.feeds.f = isolatedfeeds.f;
+                        if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;
                         
                     } else {
                         if (points.p5 == BACK) switchPoints(5, FRONT);
@@ -250,9 +310,9 @@ void processButtons() {
                     if (points.p7 == BACK) switchPoints(7, FRONT);
                     shifter.feeds.b = 1;
                     shifter.feeds.a = 1;
-                    if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
-                    if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
-                    if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                    if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
+                    if (fiddleYardPosition == 2) shifter.feeds.f = isolatedfeeds.f;
+                    if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;
                     
                 }
                 
@@ -263,9 +323,9 @@ void processButtons() {
                     if (points.p7 == BACK) switchPoints(7, FRONT);
                     shifter.feeds.b = 1;
                     shifter.feeds.a = 1;
-                    if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
-                    if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
-                    if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                    if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
+                    if (fiddleYardPosition == 2) shifter.feeds.f = isolatedfeeds.f;
+                    if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;
                     
                 } else {
                     if (points.p3 == BACK) switchPoints(3, FRONT);
@@ -273,9 +333,9 @@ void processButtons() {
                         if (points.p7 == FRONT) switchPoints(7, BACK);
                         shifter.feeds.b = 1;
                         shifter.feeds.c = 1;
-                        if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
-                        if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
-                        if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;
+                        if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
+                        if (fiddleYardPosition == 2) shifter.feeds.f = isolatedfeeds.f;
+                        if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;
                         
                     } else {
                         if (points.p5 == BACK) switchPoints(5, FRONT);
@@ -333,11 +393,17 @@ void processButtons() {
                 
             }
             shifter.feeds.a = 1;
-            if (fiddleYardPosition = 1) shifter.feeds.g = isolatedfeeds.g;
-            if (fiddleYardPosition = 2) shifter.feeds.f = isolatedfeeds.f;
-            if (fiddleYardPosition = 3) shifter.feeds.e = isolatedfeeds.e;                        
+            if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
+            if (fiddleYardPosition == 2) shifter.feeds.f = isolatedfeeds.f;
+            if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;                        
             updateDisplay();
         }
+        
+        for(byte b = 0; b < 10; b++) {
+            EEPROM_WRITE(b, shifter.data[b]);
+        }
+        EEPROM_WRITE(10, points.data);
+        EEPROM_WRITE(11, isolatedfeeds.data);
         
         pushbuttons.status.shortpress = 0;
         RB5 = 0;
@@ -357,9 +423,10 @@ void processButtons() {
         }
         
         if (pushbuttons.buttons.fy) {
-            if (fiddleYardPosition = 1) if (isolatedfeeds.g == 0) isolatedfeeds.g = 1; else isolatedfeeds.g = 0;
-            if (fiddleYardPosition = 2) if (isolatedfeeds.f == 0) isolatedfeeds.f = 1; else isolatedfeeds.f = 0;
-            if (fiddleYardPosition = 3) if (isolatedfeeds.e == 0) isolatedfeeds.e = 1; else isolatedfeeds.e = 0;                  
+            if (fiddleYardPosition == 1) { if (isolatedfeeds.g == 0) isolatedfeeds.g = 1; else isolatedfeeds.g = 0; }
+            if (fiddleYardPosition == 2) { if (isolatedfeeds.f == 0) isolatedfeeds.f = 1; else isolatedfeeds.f = 0; }
+            if (fiddleYardPosition == 3) { if (isolatedfeeds.e == 0) isolatedfeeds.e = 1; else isolatedfeeds.e = 0; }
+            shifter.feeds.a = 0;
             pushbuttons.status.shortpress = 1;
         }
         

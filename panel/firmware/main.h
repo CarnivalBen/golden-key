@@ -48,23 +48,6 @@ typedef union {
         
         byte back;
         byte front;
-//        unsigned b1 : 1;
-//        unsigned b2 : 1;
-//        unsigned b3 : 1;
-//        unsigned b4 : 1;
-//        unsigned b5 : 1;
-//        unsigned b6 : 1;
-//        unsigned b7 : 1;
-//        unsigned b8 : 1;
-//        
-//        unsigned f1 : 1;
-//        unsigned f2 : 1;
-//        unsigned f3 : 1;
-//        unsigned f4 : 1;
-//        unsigned f5 : 1;
-//        unsigned f6 : 1;
-//        unsigned f7 : 1;
-//        unsigned f8 : 1;
         
     } points;
     
@@ -164,6 +147,7 @@ typedef union {
     struct {
         unsigned portd : 8;
         unsigned portc : 8;
+        unsigned status : 8;
     } registers;  
     
     struct {
@@ -201,7 +185,8 @@ typedef union {
         unsigned g : 1;
         unsigned h : 1;
         unsigned i : 1;
-    };    
+    }; 
+    byte data;
 } isolatedfeeds_t;
 
 byte getHallSensorStatus(byte id);
@@ -212,6 +197,7 @@ void processFiddleYard(void);
 void charge(void);
 void switchPoints(byte id, byte direction);
 void updateDisplay(void);
+void initialise(void);
 
 #ifdef	__cplusplus
 }
