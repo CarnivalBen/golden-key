@@ -20,7 +20,7 @@
 #include "main.h"
 
 #define HALL_THRESHOLD 5
-#define CHARGE_PUMP_MAX 240
+#define CHARGE_PUMP_MAX 210
 #define POINTS_COIL_ON_TIME 100
 
 #define setRed(segment) shifter.display.segment##r = 1; shifter.display.segment##g = 0
@@ -34,7 +34,7 @@ volatile pushbutton_t pushbuttons;
 isolatedfeeds_t isolatedfeeds;
 points_t points;
 byte fiddleYardPosition = 0;
-word runningTimer = 1;
+word runningTimer = 0;
 
 
 
@@ -42,6 +42,8 @@ word runningTimer = 1;
 
 void main(void) {
         
+    byte charge = 0;
+    
     ADCON1 = 0b00000010;
     TRISA = 0b11111111;
     TRISB = 0b00000000;
@@ -52,30 +54,56 @@ void main(void) {
     OPTION_REG = 0b10000010;
     INTCON = 0b10100000;
         
+    RB3 = 0;
+    RB4 = 0;
+    RB5 = 0;
+    RC3 = 0;
     
-    initialise();
+    
+    //initialise();
+    
+    
     
     while (1) {        
         
         _delaywdt(1001);
-        processFiddleYard();
-        processButtons();
+        //processFiddleYard();
+        //processButtons();
               
-        if (getChargePumpVoltage() < CHARGE_PUMP_MAX) {
+        byte chrgv = getChargePumpVoltage();
+        if (chrgv < CHARGE_PUMP_MAX - 30) {
+            charge = 1;
             RB4 = 1;
-            if (RC3) RC3 = 0; else RC3 = 1;
-            
-        } else {
+        }
+
+        if (chrgv >= CHARGE_PUMP_MAX) {
+            charge = 0;
             RB4 = 0;
-            RC3 = 0;
         }
         
-        runningTimer--;
-        if (runningTimer == 0) {
-            if (RB3 == 0)
+        if (charge) {                             
+             if (RC3) {                    
+                 RC3 = 0;
+             } else {                    
+                 RC3 = 1;
+             }
+
+         } else {            
+             RC3 = 0;
+         }
+        
+        runningTimer++;
+        if (runningTimer > 1000) {
+            runningTimer = 0;
+            if (RB3 == 0) {
                 RB3 = 1;
-            else
+                RB5 = 0;
+            } else {
                 RB3 = 0;
+                RB5 = 1;
+            }
+            
+ 
         }
     }
 }
