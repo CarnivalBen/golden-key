@@ -44,23 +44,31 @@ void main(void) {
         
     byte charge = 0;
     
+    OPTION_REG = 0b10000010;
+    INTCON = 0b10100000;
+    T1CON = 0b00000000;
+    PSPMODE = 0;
+    
     ADCON1 = 0b00000010;
     TRISA = 0b11111111;
     TRISB = 0b00000000;
     TRISC = 0b00110000;    
     TRISD = 0b11111111;   
     TRISE = 0b00000000;
-    
-    OPTION_REG = 0b10000010;
-    INTCON = 0b10100000;
         
     RB3 = 0;
     RB4 = 0;
     RB5 = 0;
     RC3 = 0;
     
+    pushbuttons.status.active = 0;
+    pushbuttons.status.lock = 0;
+    pushbuttons.status.longpress = 0;
+    pushbuttons.status.shortpress = 0;
+    pushbuttons.status.timer = 0;
     
-    //initialise();
+    
+    initialise();
     
     
     
@@ -68,7 +76,14 @@ void main(void) {
         
         _delaywdt(1001);
         //processFiddleYard();
-        //processButtons();
+        processButtons();
+        
+//        if (pushbuttons.status.shortpress) {
+//            RB5 = 1;
+//        } else {
+//            RB5 = 0;
+//        }
+        
               
         byte chrgv = getChargePumpVoltage();
         if (chrgv < CHARGE_PUMP_MAX - 30) {
@@ -97,10 +112,20 @@ void main(void) {
             runningTimer = 0;
             if (RB3 == 0) {
                 RB3 = 1;
-                RB5 = 0;
+                //RB5 = 0;
+                
+                //shifter.display.dk1g = 1;
+                //shifter.display.dk1r = 0;
+                //refreshShifter();
             } else {
                 RB3 = 0;
-                RB5 = 1;
+                //RB5 = 1;
+                
+                
+                //shifter.display.dk1g = 0;
+                //shifter.display.dk1r = 1;
+                //refreshShifter();
+                
             }
             
  
@@ -117,11 +142,14 @@ void initialise() {
     for(byte b = 0; b < 10; b++) {
         lastShifter.data[b] = EEPROM_READ(b);
         shifter.data[b] = 0;
+        CLRWDT();
     }    
     refreshShifter();
     
+    CLRWDT();
     lastPoints.data = EEPROM_READ(10);
     isolatedfeeds.data = EEPROM_READ(11);
+    CLRWDT();
     
     shifter.feeds.aux1 = lastShifter.feeds.aux1;
     shifter.feeds.aux2 = lastShifter.feeds.aux2;
@@ -198,8 +226,9 @@ void processFiddleYard() {
 void processButtons() {
     
     if (pushbuttons.status.shortpress) {
-        RB5 = 1;                
+        RB5 = 1; 
         
+        CLRWDT();
         if (pushbuttons.buttons.aux1) {            
             if (shifter.feeds.aux1) {
                 shifter.feeds.aux1 = 0;
@@ -212,6 +241,7 @@ void processButtons() {
             
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.aux2) {            
             if (shifter.feeds.aux2) {
                 shifter.feeds.aux2 = 0; 
@@ -223,6 +253,7 @@ void processButtons() {
             refreshShifter();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.sd) {            
             feedsOff();
             if (points.p4 == FRONT) switchPoints(4, BACK);
@@ -232,6 +263,7 @@ void processButtons() {
             updateDisplay();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.mle) {
             feedsOff();
             if (points.p4 == BACK) switchPoints(4, FRONT);
@@ -241,6 +273,7 @@ void processButtons() {
             updateDisplay();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.dk) {
             feedsOff();
             if (points.p8 == FRONT) switchPoints(8, BACK);
@@ -258,6 +291,7 @@ void processButtons() {
             updateDisplay();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.mlw) {
             feedsOff();
             if (points.p8 == BACK) switchPoints(8, FRONT);
@@ -276,6 +310,7 @@ void processButtons() {
             updateDisplay();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.gs) {
             feedsOff();
             if (points.p1 == BACK) switchPoints(1, FRONT);
@@ -287,6 +322,7 @@ void processButtons() {
             updateDisplay();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.pl2) {
             feedsOff();
             if (points.p3 == FRONT) switchPoints(3, BACK);
@@ -309,6 +345,7 @@ void processButtons() {
             updateDisplay();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.pl1) {
             if (shifter.feeds.b) {
                 feedsOff();
@@ -379,6 +416,7 @@ void processButtons() {
             updateDisplay();
         }
         
+        CLRWDT();
         if (pushbuttons.buttons.fy) {
             if (shifter.feeds.a) {
                 feedsOff();
@@ -426,19 +464,24 @@ void processButtons() {
             if (fiddleYardPosition == 3) shifter.feeds.e = isolatedfeeds.e;                        
             updateDisplay();
         }
+ 
         
         for(byte b = 0; b < 10; b++) {
+            CLRWDT();
             EEPROM_WRITE(b, shifter.data[b]);
         }
+        CLRWDT();
         EEPROM_WRITE(10, points.data);
         EEPROM_WRITE(11, isolatedfeeds.data);
-        
+        CLRWDT();
+
         pushbuttons.status.shortpress = 0;
         RB5 = 0;
     }
     
     if (pushbuttons.status.longpress) {
         RB5 = 1;
+        CLRWDT();
         
         if (pushbuttons.buttons.mlw) {
             if (isolatedfeeds.h == 0) isolatedfeeds.h = 1; else isolatedfeeds.h = 0;
@@ -466,6 +509,7 @@ void processButtons() {
 
 void updateDisplay() {
     
+    CLRWDT();
     if (shifter.feeds.a) {
         setGreen(fy6);
         switch (fiddleYardPosition) {
@@ -543,6 +587,7 @@ void updateDisplay() {
         }
     }
     
+    CLRWDT();
     if (shifter.feeds.b) {
         setGreen(pl11);
         
@@ -560,6 +605,7 @@ void updateDisplay() {
         setRed(lp3);        
     }
     
+    CLRWDT();
     if (shifter.feeds.c) {
         setGreen(lp4);
         
@@ -579,7 +625,8 @@ void updateDisplay() {
         setRed(pl22);
     }
     
-    if (shifter.feeds.d) {
+    CLRWDT();
+    if (shifter.feeds.d) {        
         setGreen(mlw3);
         
         if (points.p5) {
@@ -635,17 +682,17 @@ void updateDisplay() {
 
 void switchPoints(byte id, byte direction) {
     
-    byte *coilselect = direction ? &shifter.points.front : &shifter.points.back;
-    
-    charge();    
-    
-    *coilselect = 1 << (id - 1);  
-    refreshShifter();
-
-    _delaywdt(POINTS_COIL_ON_TIME);
-
-    *coilselect = 0;
-    refreshShifter();
+//    byte *coilselect = direction ? &shifter.points.front : &shifter.points.back;
+//    
+//    charge();    
+//    
+//    *coilselect = 1 << (id - 1);  
+//    refreshShifter();
+//
+//    _delaywdt(POINTS_COIL_ON_TIME);
+//
+//    *coilselect = 0;
+//    refreshShifter();
         
     if (direction) {
         points.data |= 1 << (id - 1);
@@ -658,12 +705,13 @@ void __interrupt() isr() {
     
     if (TMR0IE && TMR0IF) {
         TMR0IF = 0;               
-        
+       
         if (pushbuttons.status.shortpress) goto tmr0Done;
         if (pushbuttons.status.longpress) goto tmr0Done;
         
         // SOME BUTTON IS PRESSED
         if (PORTD || (PORTC & 0b00110000)) {              
+            
             if (pushbuttons.status.lock) goto tmr0Done;
             
             // IN THE MIDDLE OF SOME ACTIVE PRESS
@@ -739,13 +787,13 @@ byte getHallSensorStatus(byte id) {
 
 void refreshShifter() {
         
-    for (unsigned char i = 9; i <= 0; i++) {
-        unsigned char reg = shifter.data[i];
+    for (byte i = 10; i > 0; i--) {
+        byte reg = shifter.data[i - 1];
         
         byte mask = 0b10000000;
 
         do {
-            RC0 = reg & mask ? 1 : 0;
+            RC0 = (reg & mask) ? 1 : 0;
 
             NOP();
             RC1 = 1;
@@ -756,7 +804,7 @@ void refreshShifter() {
 
             mask = mask >> 1;
         } while (mask > 0);        
-        
+        CLRWDT();
     }
     
     RC2 = 1;
