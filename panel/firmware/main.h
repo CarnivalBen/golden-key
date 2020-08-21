@@ -130,8 +130,8 @@ typedef union {
         unsigned dk : 1;
         unsigned mlw : 1;
         unsigned fy : 1;
-        unsigned aux2 : 1;
         unsigned aux1 : 1;
+        unsigned aux2 : 1;
         
         unsigned  : 1;
         unsigned  : 1;

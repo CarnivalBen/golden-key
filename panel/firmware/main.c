@@ -185,7 +185,7 @@ void initialise() {
     pushbuttons.status.longpress = 0;
     pushbuttons.status.shortpress = 0;
     pushbuttons.status.timer = 0;
-    
+    updateDisplay();
 }
 
 void processFiddleYard() {
