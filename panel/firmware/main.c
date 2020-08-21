@@ -140,15 +140,18 @@ void initialise() {
     points_t lastPoints;
     
     for(byte b = 0; b < 10; b++) {
-        lastShifter.data[b] = EEPROM_READ(b);
+//        lastShifter.data[b] = EEPROM_READ(b);
+        lastShifter.data[b] = readEEPROM(b);
         shifter.data[b] = 0;
         CLRWDT();
     }    
     refreshShifter();
     
     CLRWDT();
-    lastPoints.data = EEPROM_READ(10);
-    isolatedfeeds.data = EEPROM_READ(11);
+//    lastPoints.data = EEPROM_READ(10);
+//    isolatedfeeds.data = EEPROM_READ(11);
+    lastPoints.data = readEEPROM(10);
+    isolatedfeeds.data = readEEPROM(11);
     CLRWDT();
     
     shifter.feeds.aux1 = lastShifter.feeds.aux1;
@@ -274,8 +277,13 @@ void processButtons() {
         }
         
         CLRWDT();
-        if (pushbuttons.buttons.dk) {
-            feedsOff();
+        if (pushbuttons.buttons.dk) {   
+            if (shifter.feeds.c && points.p5 == BACK) {
+                feedsOff();
+                switchPoints(5, FRONT);
+            } else {
+                feedsOff();
+            }
             if (points.p8 == FRONT) switchPoints(8, BACK);
             if (points.p5 == FRONT) {
                 if (points.p6 == FRONT) switchPoints(6, BACK);
@@ -293,7 +301,12 @@ void processButtons() {
         
         CLRWDT();
         if (pushbuttons.buttons.mlw) {
-            feedsOff();
+            if (shifter.feeds.c && points.p5 == BACK) {
+                feedsOff();
+                switchPoints(5, FRONT);
+            } else {
+                feedsOff();
+            }
             if (points.p8 == BACK) switchPoints(8, FRONT);
             if (points.p5 == FRONT) {
                 if (points.p6 == FRONT) switchPoints(6, BACK);
@@ -324,7 +337,7 @@ void processButtons() {
         
         CLRWDT();
         if (pushbuttons.buttons.pl2) {
-            feedsOff();
+
             if (points.p3 == FRONT) switchPoints(3, BACK);
             if (points.p6 == FRONT) {
                 if (points.p7 == FRONT) switchPoints(7, BACK);
@@ -468,11 +481,14 @@ void processButtons() {
         
         for(byte b = 0; b < 10; b++) {
             CLRWDT();
-            EEPROM_WRITE(b, shifter.data[b]);
+            writeEEPROM(b, shifter.data[b]);
+            //EEPROM_WRITE(b, shifter.data[b]);
         }
         CLRWDT();
-        EEPROM_WRITE(10, points.data);
-        EEPROM_WRITE(11, isolatedfeeds.data);
+        writeEEPROM(10, points.data);
+        writeEEPROM(11, isolatedfeeds.data);
+        //EEPROM_WRITE(10, points.data);
+        //EEPROM_WRITE(11, isolatedfeeds.data);
         CLRWDT();
 
         pushbuttons.status.shortpress = 0;
@@ -812,4 +828,26 @@ void refreshShifter() {
     NOP();
     RC2 = 0;
     
+}
+
+
+void writeEEPROM(byte address, byte value) {
+    while (WR);
+    EEADR = address;
+    EEDATA = value;
+    EEPGD = 0;
+    WREN = 1;
+    GIE = 0;
+    EECON2 = 0x55;
+    EECON2 = 0xAA;
+    WR = 1;
+    GIE = 1;
+    WREN = 0;
+}
+
+byte readEEPROM(byte address) { 
+    EEADR = address;
+    EEPGD = 0;
+    RD = 1;
+    return EEDATA;
 }

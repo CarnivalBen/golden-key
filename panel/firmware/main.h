@@ -198,6 +198,8 @@ void charge(void);
 void switchPoints(byte id, byte direction);
 void updateDisplay(void);
 void initialise(void);
+void writeEEPROM(byte address, byte value);
+byte readEEPROM(byte address);
 
 #ifdef	__cplusplus
 }
