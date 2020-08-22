@@ -337,7 +337,7 @@ void processButtons() {
         
         CLRWDT();
         if (pushbuttons.buttons.pl2) {
-
+            feedsOff();
             if (points.p3 == FRONT) switchPoints(3, BACK);
             if (points.p6 == FRONT) {
                 if (points.p7 == FRONT) switchPoints(7, BACK);
@@ -367,6 +367,7 @@ void processButtons() {
                     if (points.p3 == BACK) switchPoints(3, FRONT);
                     if (points.p6 == FRONT) {
                         if (points.p7 == FRONT) switchPoints(7, BACK);
+                        shifter.feeds.a = 1;
                         shifter.feeds.b = 1;
                         shifter.feeds.c = 1;
                         if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
@@ -409,6 +410,7 @@ void processButtons() {
                     if (points.p3 == BACK) switchPoints(3, FRONT);
                     if (points.p6 == FRONT) {
                         if (points.p7 == FRONT) switchPoints(7, BACK);
+                        shifter.feeds.a = 1;                        
                         shifter.feeds.b = 1;
                         shifter.feeds.c = 1;
                         if (fiddleYardPosition == 1) shifter.feeds.g = isolatedfeeds.g;
@@ -442,14 +444,28 @@ void processButtons() {
                     
                 } else {
                     switchPoints(7, BACK);
-                    if (points.p6 == BACK) switchPoints(6, FRONT);
+                    if (points.p6 == BACK) switchPoints(6, FRONT);                    
                     if (points.p3 == FRONT) {
                         if (points.p2 == FRONT) switchPoints(2, BACK);
                         shifter.feeds.b = 1;
                     } else {
                         shifter.feeds.i = isolatedfeeds.i;
                     }
+                    shifter.feeds.c = 1;
                 }
+            } else if (shifter.feeds.c) {
+                feedsOff();
+                if (points.p7 == FRONT) switchPoints(7, BACK);
+                if (points.p6 == BACK) switchPoints(6, FRONT);
+                if (points.p3 == FRONT) {
+                    if (points.p2 == FRONT) switchPoints(2, BACK);
+                    shifter.feeds.b = 1;
+                } else {
+                    shifter.feeds.i = isolatedfeeds.i;                    
+                }
+                shifter.feeds.a = 1;
+                shifter.feeds.c = 1;
+                
                 
             } else {
                 feedsOff();
@@ -468,6 +484,7 @@ void processButtons() {
                     } else {
                         shifter.feeds.i = isolatedfeeds.i;
                     }
+                    shifter.feeds.c = 1;
                 }
                 
             }
