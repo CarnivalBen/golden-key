@@ -47,6 +47,7 @@ byte phase = 0;
 
 
 
+
 int main(void) {
 
     CLRWDT();
@@ -84,6 +85,8 @@ int main(void) {
 //    IOCAF = 0b00001000;
 //    IOCIE = 1;
 //    TMR0IE = 0;
+    LATA0 = 1;
+   
     GIE = 1;
     
    
@@ -99,7 +102,7 @@ int main(void) {
 
 void __interrupt() isr() {
     
-    if (TMR0IE && TMR0IF) {
+    //if (TMR0IE && TMR0IF) {
         TMR0IF = 0;
         
         pwmCount--;
@@ -109,7 +112,7 @@ void __interrupt() isr() {
             phase = 1;
 
             output.FWD = 0;
-            output.REV = 0;
+            output.REV = 0;            
 
         } else if (phase == 1 && pwmCount == 0) {
             pwmCount = pulse;
@@ -124,14 +127,16 @@ void __interrupt() isr() {
             }       
                      
         }     
-    }     
-           
-    return;
+    //}     
+               
 }
 
 
 void updateSpeed() {
     
+    byte thresMid = 85; //91;
+    byte thresTop = 170; //323;
+
     ADCON1 = 0b01100000;
     ADCON0 = 0b00001011;
     
@@ -139,10 +144,18 @@ void updateSpeed() {
     
     trainDirection = (ADRESH & 0x80) >> 7;    
     byte speed = (ADRES >> 7);        
+    
     if (!trainDirection) speed = 255 - speed;         
+    
+    if (!RA3) {
+        speed = speed / 3;
+        thresMid = 85 / 3;
+        thresTop = 170 / 3;
+    }
     
     pulse = (word)speedPulse[speed];    
     gap = speedGap[speed >> 1];
+    
     
     if (pulse == 0 && TMR0IE == 1) {
         TMR0IE = 0;
@@ -154,22 +167,22 @@ void updateSpeed() {
         phase = 0;
         TMR0IE = 1;
     }
-           
-    if (trainDirection) {        
+               
+    if (!trainDirection) {        
         output.R3 = 0;
         output.R2 = 0;
         output.R1 = 0;
         output.F1 = pulse > 0;
-        output.F2 = pulse > 0 && gap <= 323;
-        output.F3 = pulse > 0 && gap <= 91; 
+        output.F2 = pulse > 0 && speed > thresMid;
+        output.F3 = pulse > 0 && speed > thresTop; 
         
     } else {
         output.F3 = 0;
         output.F2 = 0;
         output.F1 = 0;
         output.R1 = pulse > 0;
-        output.R2 = pulse > 0 && gap <= 323;
-        output.R3 = pulse > 0 && gap <= 91; 
+        output.R2 = pulse > 0 && speed > thresMid;
+        output.R3 = pulse > 0 && speed > thresTop; 
         
     }    
 }
@@ -192,16 +205,13 @@ void setShiftReg() {
         
         NOP();
         LATA5 = 1;
-        NOP();
-        NOP();
-        LATA5 = 0;
-        NOP();
+        NOP();        
+        LATA5 = 0;        
         
         mask = mask >> 1;
     } while (mask > 0);
     
     LATA1 = 1;
-    NOP();
     NOP();
     LATA1 = 0;
     LATA4 = 0;
