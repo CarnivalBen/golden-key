@@ -189,6 +189,9 @@ typedef union {
     byte data;
 } isolatedfeeds_t;
 
+//byte getSensorEStatus();
+//byte getSensorFStatus();
+//byte getSensorGStatus();
 byte getHallSensorStatus(byte id);
 byte getChargePumpVoltage(void);
 void refreshShifter(void);

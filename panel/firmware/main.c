@@ -17,11 +17,13 @@
 // Use project enums instead of #define for ON and OFF.
 
 #include <xc.h>
+#include <pic16f877a.h>
 #include "main.h"
 
-#define HALL_THRESHOLD 5
+#define HALL_THRESHOLD 10
 #define CHARGE_PUMP_MAX 210
-#define POINTS_COIL_ON_TIME 100
+#define POINTS_COIL_ON_TIME 15000
+//#define DISABLE_NORMAL_LED_USE
 
 #define setRed(segment) shifter.display.segment##r = 1; shifter.display.segment##g = 0
 #define setGreen(segment) shifter.display.segment##g = 1; shifter.display.segment##r = 0
@@ -51,7 +53,7 @@ void main(void) {
     
     ADCON1 = 0b00000010;
     TRISA = 0b11111111;
-    TRISB = 0b00000000;
+    TRISB = 0b00000100;
     TRISC = 0b00110000;    
     TRISD = 0b11111111;   
     TRISE = 0b00000000;
@@ -71,29 +73,31 @@ void main(void) {
     initialise();
     
     
-    
+    runningTimer = 0;
     while (1) {        
         
         _delaywdt(1001);
-        //processFiddleYard();
+        processFiddleYard();
         processButtons();
-        
-//        if (pushbuttons.status.shortpress) {
-//            RB5 = 1;
-//        } else {
-//            RB5 = 0;
-//        }
+
+//        RB5 = getHallSensorStatus(0);
+//        RB4 = getHallSensorStatus(1);
+//        RB3 = getHallSensorStatus(2);
         
               
         byte chrgv = getChargePumpVoltage();
         if (chrgv < CHARGE_PUMP_MAX - 30) {
             charge = 1;
+#ifndef DISABLE_NORMAL_LED_USE
             RB4 = 1;
+#endif
         }
 
         if (chrgv >= CHARGE_PUMP_MAX) {
             charge = 0;
+#ifndef DISABLE_NORMAL_LED_USE            
             RB4 = 0;
+#endif
         }
         
         if (charge) {                             
@@ -110,25 +114,19 @@ void main(void) {
         runningTimer++;
         if (runningTimer > 1000) {
             runningTimer = 0;
+#ifndef DISABLE_NORMAL_LED_USE
             if (RB3 == 0) {
                 RB3 = 1;
-                //RB5 = 0;
-                
-                //shifter.display.dk1g = 1;
-                //shifter.display.dk1r = 0;
-                //refreshShifter();
+
             } else {
                 RB3 = 0;
-                //RB5 = 1;
                 
-                
-                //shifter.display.dk1g = 0;
-                //shifter.display.dk1r = 1;
-                //refreshShifter();
-                
+            }           
+#endif
+            if (TRISBbits.TRISB2 == 1) {
+                TRISBbits.TRISB2 = 0;
+                RB2 = 0;
             }
-            
- 
         }
     }
 }
@@ -148,8 +146,7 @@ void initialise() {
     refreshShifter();
     
     CLRWDT();
-//    lastPoints.data = EEPROM_READ(10);
-//    isolatedfeeds.data = EEPROM_READ(11);
+
     lastPoints.data = readEEPROM(10);
     isolatedfeeds.data = readEEPROM(11);
     CLRWDT();
@@ -190,24 +187,30 @@ void initialise() {
 
 void processFiddleYard() {
         
-    if (getHallSensorStatus(2) && fiddleYardPosition != 3) {
+    if (getHallSensorStatus(0) && fiddleYardPosition != 3) {
+#ifndef DISABLE_NORMAL_LED_USE
         RB5 = 1;
+#endif
         fiddleYardPosition = 3;
         shifter.feeds.e = (shifter.feeds.a && isolatedfeeds.e) ? 1 : 0;
         shifter.feeds.f = 0;
         shifter.feeds.g = 0;
-        updateDisplay();
+        updateDisplay();     
         
     } else if (getHallSensorStatus(1) && fiddleYardPosition != 2) {
+#ifndef DISABLE_NORMAL_LED_USE
         RB5 = 1;
+#endif
         fiddleYardPosition = 2;
         shifter.feeds.e = 0;
         shifter.feeds.f = (shifter.feeds.a && isolatedfeeds.f) ? 1 : 0;
         shifter.feeds.g = 0;
         updateDisplay();
         
-    } else if (getHallSensorStatus(0) && fiddleYardPosition != 1) {
+    } else if (getHallSensorStatus(2) && fiddleYardPosition != 1) {
+#ifndef DISABLE_NORMAL_LED_USE
         RB5 = 1;
+#endif
         fiddleYardPosition = 1;
         shifter.feeds.e = 0;
         shifter.feeds.f = 0;
@@ -223,14 +226,17 @@ void processFiddleYard() {
 
     }
     
+#ifndef DISABLE_NORMAL_LED_USE
     RB5 = 0;
+#endif
 }
 
 void processButtons() {
     
     if (pushbuttons.status.shortpress) {
+#ifndef DISABLE_NORMAL_LED_USE
         RB5 = 1; 
-        
+#endif        
         CLRWDT();
         if (pushbuttons.buttons.aux1) {            
             if (shifter.feeds.aux1) {
@@ -509,11 +515,15 @@ void processButtons() {
         CLRWDT();
 
         pushbuttons.status.shortpress = 0;
+#ifndef DISABLE_NORMAL_LED_USE
         RB5 = 0;
+#endif
     }
     
     if (pushbuttons.status.longpress) {
+#ifndef DISABLE_NORMAL_LED_USE
         RB5 = 1;
+#endif
         CLRWDT();
         
         if (pushbuttons.buttons.mlw) {
@@ -535,7 +545,9 @@ void processButtons() {
         }
         
         pushbuttons.status.longpress = 0;
+#ifndef DISABLE_NORMAL_LED_USE
         RB5 = 0;
+#endif
     }
     
 }
@@ -715,17 +727,17 @@ void updateDisplay() {
 
 void switchPoints(byte id, byte direction) {
     
-//    byte *coilselect = direction ? &shifter.points.front : &shifter.points.back;
-//    
-//    charge();    
-//    
-//    *coilselect = 1 << (id - 1);  
-//    refreshShifter();
-//
-//    _delaywdt(POINTS_COIL_ON_TIME);
-//
-//    *coilselect = 0;
-//    refreshShifter();
+    byte *coilselect = direction ? &shifter.points.front : &shifter.points.back;
+    
+    charge();    
+    
+    *coilselect = 1 << (id - 1);  
+    refreshShifter();
+
+    _delaywdt(POINTS_COIL_ON_TIME);
+
+    *coilselect = 0;
+    refreshShifter();
         
     if (direction) {
         points.data |= 1 << (id - 1);
@@ -787,8 +799,13 @@ void __interrupt() isr() {
 byte getChargePumpVoltage() {
     
     ADCON1 = 0b00000010;
-    ADCON0 = 0b10011101;
+    ADCON0 = 0b10011001;
+    
+    _delaywdt(100);
+    ADCON0bits.GO_nDONE = 1;
+    
     while (ADCON0bits.GO_nDONE);
+    ADON = 0;
     
     return ADRESH;    
     
@@ -797,25 +814,35 @@ byte getChargePumpVoltage() {
 void charge() {
        
     while (getChargePumpVoltage() < CHARGE_PUMP_MAX) {
+#ifndef DISABLE_NORMAL_LED_USE
         RB4 = 1;
+#endif
         RC3 = 1;
         _delaywdt(1001);
         RC3 = 0;
         _delaywdt(1001);
     }
+#ifndef DISABLE_NORMAL_LED_USE
     RB4 = 0;
+#endif
 }
+
 
 byte getHallSensorStatus(byte id) {
     
-    byte channelSelect = id << 3;    
+    ADCON1 = 0b01000010;
+    ADCON0 = 0b10000001 | (id << 3);
     
-    ADCON1 = 0b00000010;
-    ADCON0 = 0b10000101 | channelSelect;
+    _delaywdt(100);
+    
+    ADCON0bits.GO_nDONE = 1;
     while (ADCON0bits.GO_nDONE);
+    ADON = 0;
     
-    return (ADRESH > 128 + HALL_THRESHOLD || ADRESH < 127 - HALL_THRESHOLD) ? 1 : 0;
-        
+    if (ADRESH < 117) return 1;
+    if (ADRESH > 138) return 1;
+    return 0;
+ 
 }
 
 void refreshShifter() {
